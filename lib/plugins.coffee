@@ -6,13 +6,13 @@ liverequire = require './liverequire'
 exports.plugins = []
 
 exports.initialize = (callback) ->
-  awesome_file = awesome.path.root.join('awesome.json')
+  awesomebox_file = awesomebox.path.root.join('awesomebox.json')
   
-  if awesome_file.exists_sync()
+  if awesomebox_file.exists_sync()
     try
-      config = require awesome_file.absolute_path
+      config = require awesomebox_file.absolute_path
     catch e
-      awesome.logger.error 'Could not parse your awesome.json file'
+      awesomebox.logger.error 'Could not parse your awesomebox.json file'
       process.exit(1)
 
     if config.plugins?

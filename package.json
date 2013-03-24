@@ -1,8 +1,8 @@
 {
-  "name": "awesome",
-  "description": "Simply awesome web framework",
+  "name": "awesomebox",
+  "description": "The box that is awesome",
   "version": "0.0.1",
-  "homepage": "https://github.com/mattinsler/awesome",
+  "homepage": "https://github.com/mattinsler/awesomebox",
   "author": {
     "name": "Matt Insler",
     "email": "matt.insler@gmail.com",
@@ -10,19 +10,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:mattinsler/awesome.git"
+    "url": "git@github.com:mattinsler/awesomebox.git"
   },
   "bugs": {
-    "url": "https://github.com/mattinsler/awesome/issues"
+    "url": "https://github.com/mattinsler/awesomebox/issues"
   },
   "licenses": [{
     "type": "MIT",
-    "url": "https://github.com/mattinsler/awesome/blob/master/LICENSE-MIT"
+    "url": "https://github.com/mattinsler/awesomebox/blob/master/LICENSE-MIT"
   }],
-  "main": "lib/awesome",
+  "main": "lib/awesomebox",
   "bin": {
-    "awesome": "./bin/awesome",
-    "awesome-run": "./bin/awesome-run"
+    "awesomebox": "./bin/awesomebox",
+    "awesomebox-run": "./bin/awesomebox-run"
   },
   "engines": {
     "node": ">= 0.8.0"

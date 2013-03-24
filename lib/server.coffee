@@ -8,7 +8,7 @@ class Server
     @__defineGetter__ 'address', => @raw_http.address()
   
   initialize: (callback) ->
-    awesome.Plugins.server('initialize', @, callback)
+    awesomebox.Plugins.server('initialize', @, callback)
   
   configure_middleware: ->
     @http = express()
@@ -23,19 +23,19 @@ class Server
   
   configure: (callback) ->
     @configure_middleware()
-    awesome.Plugins.server('configure', @, callback)
+    awesomebox.Plugins.server('configure', @, callback)
   
   route: (req, res, next) ->
-    route = new awesome.Route(req, res, next)
+    route = new awesomebox.Route(req, res, next)
     route.respond()
   
   start: (callback) ->
     @raw_http = @http.listen 8000, (err) =>
       return callback(err) if err?
-      awesome.Plugins.server('start', @, callback)
+      awesomebox.Plugins.server('start', @, callback)
   
   stop: (callback) ->
     @http.close()
-    awesome.Plugins.server('stop', @, callback)
+    awesomebox.Plugins.server('stop', @, callback)
 
 module.exports = Server

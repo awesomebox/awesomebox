@@ -37,7 +37,7 @@ class View
       callback()
   
   after_render: (callback) ->
-    awesome.Plugins.view.after_render @opts.$, @, (err, $) =>
+    awesomebox.Plugins.view.after_render @opts.$, @, (err, $) =>
       return callback(err) if err?
       @opts.$ = $
       @opts.rendered_content = $.html()

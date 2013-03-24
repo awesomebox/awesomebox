@@ -1,4 +1,4 @@
-unless global.awesome
+unless global.awesomebox
   Module = require('module').Module
   path = process.env.NODE_PATH or ''
   delimiter = if path.indexOf(':') isnt -1 then ':' else if path.indexOf(';') isnt -1 then ';' else ':'
@@ -7,7 +7,7 @@ unless global.awesome
   
   walkabout = require 'walkabout'
   
-  awesome = global.awesome = {
+  awesomebox = global.awesomebox = {
     Logger: require './logger'
     
     path: {
@@ -17,12 +17,12 @@ unless global.awesome
     }
   }
   
-  awesome.logger = new awesome.Logger('awesome')
-  awesome.Server = require './server'
-  awesome.Route = require './route'
-  awesome.View = require './view'
-  awesome.Plugins = require './plugins'
+  awesomebox.logger = new awesomebox.Logger('awesomebox')
+  awesomebox.Server = require './server'
+  awesomebox.Route = require './route'
+  awesomebox.View = require './view'
+  awesomebox.Plugins = require './plugins'
   
-  awesome.commands = require './commands'
+  awesomebox.commands = require './commands'
 
-module.exports = global.awesome
+module.exports = global.awesomebox

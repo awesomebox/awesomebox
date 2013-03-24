@@ -39,10 +39,10 @@ class Route
     ,  callback
   
   find_layout: (root, request_type, callback) ->
-    relative = walkabout(awesome.path.layout.join(require('path').relative(awesome.path.html.absolute_path, root.absolute_path)).dirname)
+    relative = walkabout(awesomebox.path.layout.join(require('path').relative(awesomebox.path.html.absolute_path, root.absolute_path)).dirname)
     
-    paths = [awesome.path.layout.join('default.' + request_type)]
-    until relative.absolute_path is awesome.path.layout.absolute_path
+    paths = [awesomebox.path.layout.join('default.' + request_type)]
+    until relative.absolute_path is awesomebox.path.layout.absolute_path
       paths.unshift(walkabout(relative.absolute_path + '.' + request_type))
       relative = walkabout(relative.dirname)
     
@@ -60,7 +60,7 @@ class Route
         callback(null, view: template, layout: layout_template)
   
   respond: ->
-    file = awesome.path.html.join(@req.url)
+    file = awesomebox.path.html.join(@req.url)
     request_type = mime.extension(@req.headers.accept) or 'html'
     
     # console.log "REQUEST: #{@req.method} #{@req.url}"
@@ -73,8 +73,8 @@ class Route
       # console.log " view:   #{templates.view.absolute_path}"
       # console.log " layout: #{templates.layout.absolute_path}"
       
-      to_render = [new awesome.View(file: templates.view, type: request_type, route: @)]
-      to_render.push(new awesome.View(file: templates.layout, type: request_type, route: @, parent: to_render[0])) if templates.layout?
+      to_render = [new awesomebox.View(file: templates.view, type: request_type, route: @)]
+      to_render.push(new awesomebox.View(file: templates.layout, type: request_type, route: @, parent: to_render[0])) if templates.layout?
       
       async.mapSeries to_render, (v, cb) ->
         v.render(cb)
