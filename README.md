@@ -43,7 +43,7 @@ that page.  For instance, for a page at `/foo/bar/baz`, the resolution order wou
 - /layout/foo/bar.html
 - /layout/foo.html
 - /layout/default.html
-- <No Layout>
+- No Layout
 
 Layouts can use the `content()` method to place the content of the rendered page.
 
