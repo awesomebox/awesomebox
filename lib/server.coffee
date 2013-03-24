@@ -1,6 +1,7 @@
 express = require 'express'
 flash = require 'connect-flash'
 walkabout = require 'walkabout'
+portfinder = require 'portfinder'
 
 class Server
   constructor: ->
@@ -28,9 +29,11 @@ class Server
     route.respond()
   
   start: (callback) ->
-    @raw_http = @http.listen 8000, (err) =>
+    portfinder.getPort (err, port) =>
       return callback(err) if err?
-      awesomebox.Plugins.server('start', @, callback)
+      @raw_http = @http.listen port, (err) =>
+        return callback(err) if err?
+        awesomebox.Plugins.server('start', @, callback)
   
   stop: (callback) ->
     @http.close()

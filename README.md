@@ -33,6 +33,32 @@ on the page filename.  For instance, if you have a file named `index.html.ejs.ho
 run through the `hogan` rendering engine and then then `ejs` rendering engine.  The resulting data will be returned
 to the browser as HTML.
 
+## The `awe` Object
+
+The `awe` object is always available from your templates and contains special methods that link you into the
+awesomebox system.  The most notable of these is the `awe.content` method.  This can be used by layouts to render
+the main template for the current route or to render partials.  There are also other properties available on the
+`awe` object, such as the current view and current route.
+
+## Partials
+
+Partials are rendered using the `awe.content` method from within templates.  Partial filenames _MUST_ start with
+the `_` character.  Partial resolution is the same as page resolution, except that partials are resolved either
+relative to the template it is being called from or absolutely from the `html` directory.
+
+For instance, if the layout at `/layout/default.html.ejs` wants to include a footer partial, it can reference a
+partial at `/layout/partials/_footer.html.ejs` by including this:
+
+```html
+<%- awe.content('partials/footer') %>
+```
+
+However, if the partial was located at `/html/_footer.html.ejs`, then the layout should include this:
+
+```html
+<%- awe.content('/footer') %>
+```
+
 ## Layouts
 
 Layouts are used to abstract away all the headers and footers and general page structure that all pages tend to
@@ -45,7 +71,7 @@ that page.  For instance, for a page at `/foo/bar/baz`, the resolution order wou
 - /layout/default.html
 - No Layout
 
-Layouts can use the `content()` method to place the content of the rendered page.
+Layouts can use the `awe.content()` method to place the content of the rendered page.
 
 ## Plugins
 

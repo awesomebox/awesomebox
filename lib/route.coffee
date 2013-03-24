@@ -22,20 +22,11 @@ firstSeries = doSeries(_first)
 class Route
   constructor: (@req, @res, @next) ->
   
-  find_template_file: (file, callback) ->
-    filename = file.filename
-    walkabout(file.dirname).readdir (err, files) ->
-      if err?
-        return callback(err) unless err.code is 'ENOENT'
-        return callback()
-      f = _(files).find (f) -> f.filename.indexOf(filename) is 0 and (f.filename.length is filename.length or f.filename[filename.length] is '.')
-      callback(null, f)
-  
   find_template: (root, request_type, callback) ->
     paths = [root.join("index.#{request_type}"), root]
     
     firstSeries paths, (p, cb) =>
-      @find_template_file(p, cb)
+      awesomebox.View.find_template_file(p, cb)
     ,  callback
   
   find_layout: (root, request_type, callback) ->
@@ -47,7 +38,7 @@ class Route
       relative = walkabout(relative.dirname)
     
     firstSeries paths, (p, cb) =>
-      @find_template_file(p, cb)
+      awesomebox.View.find_template_file(p, cb)
     , callback
   
   find_view_and_layout: (file, request_type, callback) ->

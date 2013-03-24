@@ -1,7 +1,7 @@
 {
   "name": "awesomebox",
   "description": "The box that is awesome",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "https://github.com/mattinsler/awesomebox",
   "author": {
     "name": "Matt Insler",
@@ -37,7 +37,11 @@
     "async": "latest",
     "npm": "latest",
     "colors": "latest",
-    "open": "latest"
+    "open": "latest",
+    "consolidate": "latest",
+    "mime": "latest",
+    "cheerio": "latest",
+    "portfinder": "latest"
   },
   "devDependencies": {
   },
