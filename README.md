@@ -49,13 +49,13 @@ relative to the template it is being called from or absolutely from the `html` d
 For instance, if the layout at `/layout/default.html.ejs` wants to include a footer partial, it can reference a
 partial at `/layout/partials/_footer.html.ejs` by including this:
 
-```html
+```erb
 <%- awe.content('partials/footer') %>
 ```
 
 However, if the partial was located at `/html/_footer.html.ejs`, then the layout should include this:
 
-```html
+```erb
 <%- awe.content('/footer') %>
 ```
 
