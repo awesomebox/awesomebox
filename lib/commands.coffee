@@ -15,3 +15,4 @@ exports.run = ->
       process.exit(1)
     
     awesomebox.logger.log "Listening on port #{server.address.port}"
+    require('open') "http://#{server.address.address}:#{server.address.port}"

@@ -36,7 +36,8 @@
     "underscore": "latest",
     "async": "latest",
     "npm": "latest",
-    "colors": "latest"
+    "colors": "latest",
+    "open": "latest"
   },
   "devDependencies": {
   },
