@@ -1,0 +1,44 @@
+{
+  "name": "awesome",
+  "description": "Simply awesome web framework",
+  "version": "0.0.1",
+  "homepage": "https://github.com/mattinsler/awesome",
+  "author": {
+    "name": "Matt Insler",
+    "email": "matt.insler@gmail.com",
+    "url": "http://www.mattinsler.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:mattinsler/awesome.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mattinsler/awesome/issues"
+  },
+  "licenses": [{
+    "type": "MIT",
+    "url": "https://github.com/mattinsler/awesome/blob/master/LICENSE-MIT"
+  }],
+  "main": "lib/awesome",
+  "bin": {
+    "awesome": "./bin/awesome",
+    "awesome-run": "./bin/awesome-run"
+  },
+  "engines": {
+    "node": ">= 0.8.0"
+  },
+  "dependencies": {
+    "coffee-script": "latest",
+    "commander": "latest",
+    "walkabout": "latest",
+    "express": "latest",
+    "connect-flash": "latest",
+    "underscore": "latest",
+    "async": "latest",
+    "npm": "latest",
+    "colors": "latest"
+  },
+  "devDependencies": {
+  },
+  "keywords": []
+}
