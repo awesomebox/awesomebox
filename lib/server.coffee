@@ -11,8 +11,6 @@ class Server
     awesomebox.Plugins.server('initialize', @, callback)
   
   configure_middleware: ->
-    @http = express()
-    
     @http.use express.compress()
     @http.use express.bodyParser()
     @http.use express.methodOverride()

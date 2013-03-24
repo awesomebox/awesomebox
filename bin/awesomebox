@@ -6,5 +6,6 @@ program
   .version(require('../package').version)
   
   .command('run', 'Run!')
+  .command('deploy', 'Deploy!')
   
   .parse(process.argv);

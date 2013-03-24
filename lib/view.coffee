@@ -44,13 +44,14 @@ class View
       callback()
   
   content: (partial) ->
-    # render_partial = (view, partial) ->
+    render_partial = (partial) =>
+      ''
     #   if partial[0] is '/'
     #     partial_path = Awesome.path.html.join(partial)
     #   else
     #     partial_path = view.file.join(partial)
     
-    # return render_partial(partial) if partial?
+    return render_partial(partial) if partial?
     
     return '' unless @opts.parent?
     @opts.parent.opts.rendered_content
