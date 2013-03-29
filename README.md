@@ -1,6 +1,6 @@
 # awesomebox
 
-The box that is awesome
+Concentrate on building your site, not managing it
 
 ## Installation
 
