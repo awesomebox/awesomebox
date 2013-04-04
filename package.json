@@ -46,7 +46,8 @@
     "fstream": "latest",
     "request": "latest",
     "read": "https://github.com/mattinsler/read/tarball/master",
-    "moment": "~2.0.0"
+    "moment": "~2.0.0",
+    "awesomebox.node": "latest"
   },
   "devDependencies": {},
   "keywords": []
