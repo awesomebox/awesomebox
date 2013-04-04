@@ -1,7 +1,7 @@
 {
   "name": "awesomebox",
   "description": "The box that is awesome",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "homepage": "https://github.com/mattinsler/awesomebox",
   "author": {
     "name": "Matt Insler",
@@ -15,14 +15,15 @@
   "bugs": {
     "url": "https://github.com/mattinsler/awesomebox/issues"
   },
-  "licenses": [{
-    "type": "MIT",
-    "url": "https://github.com/mattinsler/awesomebox/blob/master/LICENSE-MIT"
-  }],
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/mattinsler/awesomebox/blob/master/LICENSE-MIT"
+    }
+  ],
   "main": "lib/awesomebox",
   "bin": {
-    "awesomebox": "./bin/awesomebox",
-    "awesomebox-run": "./bin/awesomebox-run"
+    "awesomebox": "./bin/awesomebox"
   },
   "engines": {
     "node": ">= 0.8.0"
@@ -37,13 +38,16 @@
     "async": "latest",
     "npm": "latest",
     "colors": "latest",
-    "open": "latest",
     "consolidate": "latest",
     "mime": "latest",
     "cheerio": "latest",
-    "portfinder": "latest"
+    "portfinder": "latest",
+    "tar": "latest",
+    "fstream": "latest",
+    "request": "latest",
+    "read": "https://github.com/mattinsler/read/tarball/master",
+    "moment": "~2.0.0"
   },
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "keywords": []
 }

@@ -1,11 +1,27 @@
 #!/usr/bin/env node
 
-var program = require('commander');
+require('coffee-script');
+var program = require('commander')
+  , awesomebox = require('../lib/awesomebox');
 
-program
-  .version(require('../package').version)
+program.version(require('../package').version);
+
+awesomebox.Plugins.initialize(function() {
+  var commands = Object.keys(awesomebox.commands).sort();
+
+  commands.forEach(function(command) {
+    program
+      .command(command)
+      .description(awesomebox.commands[command].description || command)
+      .action(function() {
+        awesomebox.commands[command]();
+      });
+    awesomebox.Plugins.context.wrap(awesomebox.commands, 'command.' + command, command);
+  });
   
-  .command('run', 'Run!')
-  .command('deploy', 'Deploy!')
-  
-  .parse(process.argv);
+  var o = program.parse(process.argv);
+
+  if (o.args.length === 0) {
+    program.help();
+  }
+});

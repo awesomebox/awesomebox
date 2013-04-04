@@ -5,50 +5,64 @@ liverequire = require './liverequire'
 
 exports.plugins = []
 
-exports.initialize = (callback) ->
-  awesomebox_file = awesomebox.path.root.join('awesomebox.json')
+class PluginContext
+  constructor: ->
+    @events = {}
   
-  if awesomebox_file.exists_sync()
-    try
-      config = require awesomebox_file.absolute_path
-    catch e
-      awesomebox.logger.error 'Could not parse your awesomebox.json file'
-      process.exit(1)
-
-    if config.plugins?
-      config.plugins = [config.plugins] unless Array.isArray(config.plugins)
-      liverequire config.plugins, (err, plugins) ->
-        return callback(err) if err?
-        exports.plugins = plugins
-        callback()
-
-exports.of_type = (type) ->
-  type = type.split('.')
+  on: (event, method, context) ->
+    @events[event] ?= []
+    @events[event].push(method: method, context: context)
   
-  exports.plugins.filter (plugin) ->
-    c = plugin
-    _(type).every (t) ->
-      c = c[t]
-      c?
-
-exports.server = (method, server, callback) ->
-  plugins = exports.of_type("server.#{method}")
-  return callback?() if plugins.length is 0
-  
-  async.eachSeries plugins, (plugin, cb) ->
-    plugin.server[method](server, cb)
-  , (err) ->
-    return callback?(err) if err?
-    callback?()
-
-exports.view = {
-  after_render: ($, view, callback) ->
-    plugins = exports.of_type('view.after_render')
-    return callback?(null, $) if plugins.length is 0
+  wrap: (instance, event_name, method) ->
+    m = instance[method]
     
-    async.eachSeries plugins, (plugin, cb) ->
-      plugin.view.after_render($, view, cb)
-    , (err) ->
-      return callback?(err) if err?
-      callback?(null, $)
-}
+    instance[method] = =>
+      args = Array::slice.call(arguments)
+      callback = _(args).last()
+      if typeof callback is 'function'
+        args = args[0...-1]
+      else
+        callback = ->
+      
+      event_methods = []
+      Array::push.apply(event_methods, @events['pre:' + event_name]) if @events['pre:' + event_name]?.length > 0
+      event_methods.push(method: m, context: instance, actual: true)
+      Array::push.apply(event_methods, @events['post:' + event_name]) if @events['post:' + event_name]?.length > 0
+      
+      results = null
+      async.eachSeries event_methods, (em, cb) ->
+        if em.actual
+          em.method.apply em.context, args.concat([->
+            results = Array::slice.call(arguments)
+            cb.apply(arguments)
+          ])
+        else
+          em.method.call(em.context, instance, args, results, cb)
+      , (err) ->
+        return callback(err) if err?
+        callback.apply(null, results)
+
+exports.wrap = (instance, methods) ->
+  if Array.isArray(methods)
+    methods = _(methods).inject (o, m) ->
+      o[m] = m
+      o
+    , {}
+  
+  exports.context.wrap(instance, k, v) for k, v of methods
+
+exports.initialize = (callback) ->
+  exports.context = new PluginContext()
+  
+  config = awesomebox.config
+  return callback() unless config.plugins?
+  config.plugins = [config.plugins] unless Array.isArray(config.plugins)
+  
+  liverequire config.plugins, (err, plugins) ->
+    return callback(err) if err?
+    exports.plugins = plugins
+    
+    async.eachSeries plugins, (p, cb) ->
+      return cb() unless typeof p is 'function'
+      p(exports.context, cb)
+    , callback

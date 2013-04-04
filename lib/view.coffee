@@ -21,6 +21,9 @@ class View extends EventEmitter
       callback(null, f)
   
   constructor: (@opts = {}) ->
+    awesomebox.Plugins.wrap(@,
+      'view.render': 'do_render'
+    )
   
   install_engines: (callback) ->
     return callback() unless @opts.engines?.length > 0
@@ -28,6 +31,7 @@ class View extends EventEmitter
     not_supported = @opts.engines.filter (e) -> !consolidate[e]?
     return callback(new Error("#{not_supported} view engine(s) are not supported")) unless not_supported.length is 0
     
+    console.log 'requiring ' + require('util').inspect(@opts.engines)
     liverequire(@opts.engines, callback)
   
   render_through_engines: (callback) ->
@@ -60,14 +64,9 @@ class View extends EventEmitter
       @opts.content = content
       callback()
   
-  after_render: (callback) ->
+  load_cheerio: (callback) ->
     @opts.$ = cheerio.load(@opts.rendered_content)
-    
-    awesomebox.Plugins.view.after_render @opts.$, @, (err, $) =>
-      return callback(err) if err?
-      @opts.$ = $
-      @opts.rendered_content = $.html()
-      callback()
+    callback()
   
   content: (partial, data) ->
     render_partial = (partial, data) =>
@@ -115,23 +114,25 @@ class View extends EventEmitter
         cb()
     , callback
   
-  render: (callback) ->
-    rfilename = @opts.file.filename.split('.').reverse()
-    @opts.engines = rfilename[0...rfilename.indexOf(@opts.type)]
-    @opts.placeholders = []
-    
-    @opts.view_data ?= {}
-    
-    work = [
+  do_render: (callback) ->
+    async.series [
       (cb) => @fetch_content(cb)
       (cb) => @install_engines(cb)
       (cb) => @render_through_engines(cb)
       (cb) => @wait_for_placeholders(cb)
-      (cb) => @after_render(cb)
-    ]
+      # (cb) => @after_render(cb)
+      (cb) => @load_cheerio(cb)
+    ], callback
+  
+  render: (callback) ->
+    rfilename = @opts.file.filename.split('.').reverse()
+    @opts.engines = rfilename[0...rfilename.indexOf(@opts.type)]
+    @opts.placeholders = []
+    @opts.view_data ?= {}
     
-    async.series work, (err) =>
+    @do_render (err) =>
       return callback?(err) if err?
+      @opts.rendered_content = @opts.$.html()
       @opts.done = true
       @emit('done')
       callback?(null, @opts.rendered_content)
