@@ -11,14 +11,12 @@ client = (email, password) ->
 
 
 
-exports.run = ->
+exports.run = (callback) ->
   async = require 'async'
   
-  server = null
+  server = new awesomebox.Server()
   
   async.series [
-    # (cb) -> awesomebox.Plugins.initialize(cb)
-    (cb) -> server = new awesomebox.Server(); cb()
     (cb) -> server.initialize(cb)
     (cb) -> server.configure(cb)
     (cb) -> server.start(cb)
@@ -26,6 +24,7 @@ exports.run = ->
     if err?
       awesomebox.logger.error err.message
       process.exit(1)
+    callback()
 
 exports.run.description = 'Run!'
 
@@ -97,7 +96,7 @@ print_status = (callback) ->
 exports.status = (callback) ->
   client().app(awesomebox.name).status(print_status(callback))
 
-exports.login = ->
+exports.login = (callback) ->
   Prompt = require './prompt'
   prompt = new Prompt(awesomebox.logger.prompt)
   
@@ -109,12 +108,14 @@ exports.login = ->
         config.api_key = user.api_key
         awesomebox.client_config = config
         awesomebox.logger.log 'Logged in successfully!'
+        callback()
 
-exports.logout = ->
+exports.logout = (callback) ->
   config = awesomebox.client_config
   delete config.api_key
   awesomebox.client_config = config
   awesomebox.logger.log 'Logged out successfully!'
+  callback()
 
 exports.start = (callback) ->
   client().app(awesomebox.name).start(print_status(callback))
@@ -122,8 +123,9 @@ exports.start = (callback) ->
 exports.stop = (callback) ->
   client().app(awesomebox.name).stop(print_status(callback))
 
-exports.logs = ->
+exports.logs = (callback) ->
   client().app(awesomebox.name).logs (err, data) ->
     return print_error(err) if err?
     console.log()
     console.log data
+    callback()
