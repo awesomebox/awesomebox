@@ -1,7 +1,7 @@
 {
   "name": "awesomebox",
   "description": "The box that is awesome",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "homepage": "https://github.com/mattinsler/awesomebox",
   "author": {
     "name": "Matt Insler",
@@ -23,7 +23,8 @@
   ],
   "main": "lib/awesomebox",
   "bin": {
-    "awesomebox": "./bin/awesomebox"
+    "awesomebox": "./bin/awesomebox",
+    "awesomebox-domains": "./bin/awesomebox-domains"
   },
   "engines": {
     "node": ">= 0.8.0"

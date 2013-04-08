@@ -86,7 +86,7 @@ print_status = (callback) ->
     awesomebox.logger.log "Application:  #{data.app}"
     if data.running
       awesomebox.logger.log "Running for:  #{moment(data.ctime).fromNow(true)}"
-      awesomebox.logger.log "URL:          http://#{JSON.parse(data.spawnWith.env.__AWESOMEBOX_CONFIG__).domain}"
+      awesomebox.logger.log 'URL:          ' + JSON.parse(data.spawnWith.env.__AWESOMEBOX_CONFIG__).domain.split(',').map((d) -> "http://#{d}").join('\n                           ')
     else
       awesomebox.logger.log "Not running"
     console.log()
@@ -129,3 +129,20 @@ exports.logs = (callback) ->
     console.log()
     console.log data
     callback()
+
+exports.domains =
+  add: (domain, callback) ->
+    client().app(awesomebox.name).domains.add domain, (err, data) ->
+      return print_error(err) if err?
+      console.log data
+      callback()
+  remove: (domain, callback) ->
+    client().app(awesomebox.name).domains.remove domain, (err, data) ->
+      return print_error(err) if err?
+      console.log data
+      callback()
+  list: (callback) ->
+    client().app(awesomebox.name).domains.list (err, data) ->
+      return print_error(err) if err?
+      console.log data
+      callback()
