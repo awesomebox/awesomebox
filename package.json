@@ -24,7 +24,8 @@
   "main": "lib/awesomebox",
   "bin": {
     "awesomebox": "./bin/awesomebox",
-    "awesomebox-domains": "./bin/awesomebox-domains"
+    "awesomebox-domains": "./bin/awesomebox-domains",
+    "awesomebox-generate": "./bin/awesomebox-generate"
   },
   "engines": {
     "node": ">= 0.8.0"
@@ -48,7 +49,9 @@
     "request": "latest",
     "read": "https://github.com/mattinsler/read/tarball/master",
     "moment": "~2.0.0",
-    "awesomebox.node": "latest"
+    "awesomebox.node": "latest",
+    "update-notifier": "~0.1.3",
+    "connect-compiler": "~0.1.2"
   },
   "devDependencies": {},
   "keywords": []

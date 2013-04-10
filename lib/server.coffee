@@ -30,7 +30,7 @@ class Server extends EventEmitter
     @http.use express.session(secret: 'hohgah5Weegi0zae6vookaehoo0ieQu5')
     @http.use flash()
     @http.use @route.bind(@)
-    @http.use express.static(awesomebox.path.root.join('public').absolute_path)
+    @http.use express.static(awesomebox.path.content.absolute_path)
     callback()
   
   configure: (callback) ->

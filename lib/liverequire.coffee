@@ -20,7 +20,6 @@ do_require = (pkg, callback) ->
   try
     callback(null, require(p))
   catch e
-    console.log e.stack
     if p[0] is '/'
       e.message = 'Could not load ' + pkg + ': ' + e.message
       return callback(e)

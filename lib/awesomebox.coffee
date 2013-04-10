@@ -12,8 +12,9 @@ unless global.awesomebox
     
     path: {
       root: walkabout()
-      html: walkabout('html')
-      layout: walkabout('layout')
+      data: walkabout('data')
+      content: walkabout('content')
+      layouts: walkabout('layouts')
     }
   }
   

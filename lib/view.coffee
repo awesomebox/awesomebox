@@ -1,3 +1,4 @@
+{Module} = require 'module'
 {EventEmitter} = require 'events'
 
 _ = require 'underscore'
@@ -8,6 +9,55 @@ consolidate = require 'consolidate'
 liverequire = require './liverequire'
 
 PARTIAL_NUMBER = 1000
+
+
+consolidate_render = (engine) ->
+  (data, view, callback) ->
+    view_data = _(view.opts.view_data).clone()
+    _(view_data).extend(
+      box: {
+        view: view
+        route: view.opts.route
+        content: view.content.bind(view)
+        data: view.data.bind(view)
+      }
+    )
+  
+    consolidate[engine].render(data, view_data, callback)
+
+# Need to add stylus, sass, scss
+
+ENGINES =
+  coffee:
+    require: 'coffee-script'
+    process: (data, view, callback) ->
+      try
+        callback(null, require('coffee-script').compile(data, bare: true))
+      catch e
+        callback(e)
+  
+  less:
+    require: 'recess'
+    process: (data, view, callback) ->
+      Recess = require('recess').Constructor
+      instance = new Recess()
+      instance.options.compile = true
+      # instance.options.compress = true
+      instance.path = view.opts.file.absolute_path
+      instance.data = data
+      instance.callback = ->
+        if instance.errors.length > 0
+          return callback(instance.errors[0])
+        callback(null, instance.output.join('\n'))
+      
+      instance.parse()
+
+for k in Object.keys(consolidate) when k isnt 'clearCache'
+  ENGINES[k] = 
+    require: k
+    process: consolidate_render(k)
+
+console.log ENGINES
 
 class View extends EventEmitter
   @find_template_file: (file, callback) ->
@@ -20,34 +70,42 @@ class View extends EventEmitter
       f = _(files).find (f) -> f.filename.indexOf(filename) is 0 and (f.filename.length is filename.length or f.filename[filename.length] is '.')
       callback(null, f)
   
+  @find_template_file_sync: (file) ->
+    file = walkabout(file)
+    filename = file.filename
+    try
+      files = file.directory().readdir_sync()
+      _(files).find (f) -> f.filename.indexOf(filename) is 0 and (f.filename.length is filename.length or f.filename[filename.length] is '.')
+    catch err
+      null
+  
   constructor: (@opts = {}) ->
     awesomebox.Plugins.wrap(@,
       'view.render': 'do_render'
     )
   
+  fetch_content: (callback) ->
+    return callback() if @opts.content?
+
+    @opts.file.read_file (err, content) =>
+      return callback(err) if err?
+      @opts.content = content
+      callback()
+  
   install_engines: (callback) ->
     return callback() unless @opts.engines?.length > 0
     
-    not_supported = @opts.engines.filter (e) -> !consolidate[e]?
+    not_supported = @opts.engines.filter (e) -> !ENGINES[e]?
     return callback(new Error("#{not_supported} view engine(s) are not supported")) unless not_supported.length is 0
     
-    console.log 'requiring ' + require('util').inspect(@opts.engines)
-    liverequire(@opts.engines, callback)
+    # console.log 'requiring ' + require('util').inspect(@opts.engines)
+    liverequire(@opts.engines.map((e) -> ENGINES[e].require), callback)
   
   render_through_engines: (callback) ->
     data = @opts.content
     
     async.eachSeries @opts.engines, (engine, cb) =>
-      view_data = _(@opts.view_data).clone()
-      _(view_data).extend(
-        awe: {
-          view: @
-          route: @opts.route
-          content: @content.bind(@)
-        }
-      )
-      
-      consolidate[engine].render data, view_data, (err, rendered) ->
+      ENGINES[engine].process data, @, (err, rendered) ->
         return cb(err) if err?
         data = rendered
         cb()
@@ -56,24 +114,34 @@ class View extends EventEmitter
       @opts.rendered_content = data
       callback()
   
-  fetch_content: (callback) ->
-    return callback() if @opts.content?
-    
-    @opts.file.read_file (err, content) =>
-      return callback(err) if err?
-      @opts.content = content
-      callback()
-  
   load_cheerio: (callback) ->
-    @opts.$ = cheerio.load(@opts.rendered_content)
+    if @opts.type is 'html'
+      @opts.$ = cheerio.load(@opts.rendered_content)
     callback()
+  
+  data: (path) ->
+    # make it so we can load xml, yml, json, etc...
+    # try to load remote sources too...
+    
+    data_path = awesomebox.path.data.join(path)
+    data_file = View.find_template_file_sync(data_path)
+    unless data_file?
+      awesomebox.logger.error 'No data file at ' + path
+      return {}
+    try
+      delete Module._cache[data_file.absolute_path]
+      require(data_file.absolute_path)
+    catch err
+      awesomebox.logger.error 'Error in parsing data file ' + path
+      console.error err.stack
+      {}
   
   content: (partial, data) ->
     render_partial = (partial, data) =>
       placeholder = "<[PARTIAL-#{PARTIAL_NUMBER++}]>"
       
       if partial[0] is '/'
-        partial_path = awesomebox.path.html.join(partial)
+        partial_path = awesomebox.path.content.join(partial)
       else
         partial_path = @opts.file.directory().join(partial)
       
@@ -132,7 +200,7 @@ class View extends EventEmitter
     
     @do_render (err) =>
       return callback?(err) if err?
-      @opts.rendered_content = @opts.$.html()
+      @opts.rendered_content = @opts.$.html() if @opts.$?
       @opts.done = true
       @emit('done')
       callback?(null, @opts.rendered_content)
