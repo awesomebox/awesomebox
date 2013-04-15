@@ -10,6 +10,7 @@ unless global.awesomebox
   awesomebox = global.awesomebox = {
     Logger: require './logger'
     
+    root: walkabout(__dirname).join('..')
     path: {
       root: walkabout()
       data: walkabout('data')
@@ -18,6 +19,8 @@ unless global.awesomebox
     }
   }
   
+  awesomebox.config_file = awesomebox.path.root.join('awesomebox.json')
+  awesomebox.default_config = require '../templates/default.awesomebox.json'
   awesomebox.logger = new awesomebox.Logger('awesomebox')
   awesomebox.Server = require './server'
   awesomebox.Route = require './route'
@@ -31,16 +34,16 @@ awesomebox.__defineGetter__ 'name', ->
 
 awesomebox.__defineGetter__ 'config', ->
   try
-    config = awesomebox.path.root.join('awesomebox.json').read_file_sync()
+    config = awesomebox.config_file.read_file_sync()
     JSON.parse(config)
   catch e
-    return {} if e.code is 'ENOENT'
+    return awesomebox.default_config if e.code is 'ENOENT'
     awesomebox.logger.error 'An error occurred while parsing your awesomebox.json file'
     process.exit(1)
 
 awesomebox.__defineSetter__ 'config', (config) ->
   try
-    awesomebox.path.root.join('awesomebox.json').writefile_sync(JSON.stringify(config, null, 2))
+    awesomebox.config_file.writefile_sync(JSON.stringify(config, null, 2))
   catch e
 
 awesomebox.__defineGetter__ 'client_config', ->

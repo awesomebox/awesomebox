@@ -1,7 +1,7 @@
 {
   "name": "awesomebox",
   "description": "The box that is awesome",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "homepage": "https://github.com/mattinsler/awesomebox",
   "author": {
     "name": "Matt Insler",
@@ -21,7 +21,7 @@
       "url": "https://github.com/mattinsler/awesomebox/blob/master/LICENSE-MIT"
     }
   ],
-  "main": "lib/awesomebox",
+  "main": "index.js",
   "bin": {
     "awesomebox": "./bin/awesomebox",
     "awesomebox-domains": "./bin/awesomebox-domains",

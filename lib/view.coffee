@@ -1,3 +1,4 @@
+vm = require 'vm'
 {Module} = require 'module'
 {EventEmitter} = require 'events'
 
@@ -11,6 +12,14 @@ liverequire = require './liverequire'
 PARTIAL_NUMBER = 1000
 
 
+PARSERS =
+  json:
+    parse: (data) -> JSON.parse(data)
+  yml:
+    parse: (data) -> require('js-yaml').load(data)
+  yaml:
+    parse: (data) -> require('js-yaml').load(data)
+
 consolidate_render = (engine) ->
   (data, view, callback) ->
     view_data = _(view.opts.view_data).clone()
@@ -21,11 +30,12 @@ consolidate_render = (engine) ->
         content: view.content.bind(view)
         data: view.data.bind(view)
       }
+      awesomebox: null
     )
-  
+    view_data.box.data.raw = view.raw_data.bind(view)
+    
     consolidate[engine].render(data, view_data, callback)
-
-# Need to add stylus, sass, scss
+    
 
 ENGINES =
   coffee:
@@ -35,6 +45,27 @@ ENGINES =
         callback(null, require('coffee-script').compile(data, bare: true))
       catch e
         callback(e)
+  
+  sass:
+    require: 'sass'
+    process: (data, view, callback) ->
+      try
+        callback(null, require('sass').render(data))
+      catch err
+        callback(err)
+  
+  scss:
+    require: 'sass'
+    process: (data, view, callback) ->
+      try
+        callback(null, require('sass').render(data))
+      catch err
+        callback(err)
+  
+  styl:
+    require: 'stylus'
+    process: (data, view, callback) ->
+      stylus.render(data, {filename: view.opts.file.absolute_path}, callback)
   
   less:
     require: 'recess'
@@ -57,7 +88,6 @@ for k in Object.keys(consolidate) when k isnt 'clearCache'
     require: k
     process: consolidate_render(k)
 
-console.log ENGINES
 
 class View extends EventEmitter
   @find_template_file: (file, callback) ->
@@ -80,6 +110,7 @@ class View extends EventEmitter
       null
   
   constructor: (@opts = {}) ->
+    @opts.route.view = @ unless @opts.parent?
     awesomebox.Plugins.wrap(@,
       'view.render': 'do_render'
     )
@@ -125,16 +156,29 @@ class View extends EventEmitter
     
     data_path = awesomebox.path.data.join(path)
     data_file = View.find_template_file_sync(data_path)
-    unless data_file?
+    if !data_file? or require('path').relative(awesomebox.path.data.absolute_path, data_file.absolute_path).indexOf('..') isnt -1
       awesomebox.logger.error 'No data file at ' + path
-      return {}
+      return null
+    
+    data = data_file.read_file_sync()
+    
+    parser = PARSERS[data_file.extension]
+    return data unless parser?
+    
     try
-      delete Module._cache[data_file.absolute_path]
-      require(data_file.absolute_path)
+      parser.parse(data)
     catch err
       awesomebox.logger.error 'Error in parsing data file ' + path
-      console.error err.stack
-      {}
+      awesomebox.logger.error err.stack
+      null
+  
+  raw_data: (path) ->
+    data_path = awesomebox.path.data.join(path)
+    data_file = View.find_template_file_sync(data_path)
+    return data_file.read_file_sync() if data_file? and require('path').relative(awesomebox.path.data.absolute_path, data_file.absolute_path).indexOf('..') is -1
+    
+    awesomebox.logger.error 'No data file at ' + path
+    null
   
   content: (partial, data) ->
     render_partial = (partial, data) =>
@@ -146,6 +190,10 @@ class View extends EventEmitter
         partial_path = @opts.file.directory().join(partial)
       
       partial_path = partial_path.directory().join('_' + partial_path.filename + '.' + @opts.type)
+      
+      if require('path').relative(awesomebox.path.content.absolute_path, partial_path.absolute_path).indexOf('..') isnt -1
+        awesomebox.logger.error 'No content file at ' + partial_path.path
+        return ''
       
       # Push incomplete view so that parent will wait
       view = new View(type: @opts.type, route: @opts.route, parent: @, placeholder: placeholder, view_data: data)
@@ -165,6 +213,8 @@ class View extends EventEmitter
         
         # Set the view's file before rendering
         view.opts.file = template
+        # If data was a string, fetch the data file before render
+        view.opts.view_data = @data(view.opts.view_data) if typeof view.opts.view_data is 'string'
         view.render()
       
       placeholder

@@ -22,6 +22,8 @@ firstSeries = doSeries(_first)
 
 class Route
   constructor: (@req, @res, @next) ->
+    @req.awesomebox ?= {}
+    @req.awesomebox.route = @
   
   find_template: (root, callback) ->
     paths = [root]
@@ -44,16 +46,16 @@ class Route
     , callback
   
   respond: ->
-    file = awesomebox.path.content.join(@req.url)
-    request_type = file.extension or 'html'
+    @request_path = awesomebox.path.content.join(@req.url)
+    @request_type = @request_path.extension or 'html'
     
     # console.log "REQUEST: #{@req.method} #{@req.url}"
     
-    @find_template file, (err, template) =>
+    @find_template @request_path, (err, template) =>
       return @next(err) if err?
       return @next() unless template?
       
-      to_render = [new awesomebox.View(file: template, type: request_type, route: @)]
+      to_render = [new awesomebox.View(file: template, type: @request_type, route: @)]
       
       do_render = =>
         async.mapSeries to_render, (v, cb) ->
@@ -63,14 +65,14 @@ class Route
             return @next(err) unless err.code in ['EISDIR']
             return @next()
           
-          @res.set('Content-Type': mime.lookup(request_type))
+          @res.set('Content-Type': mime.lookup(@request_type))
           @res.send(_(data).last())
       
-      return do_render() unless request_type is 'html'
+      return do_render() unless @request_type is 'html'
       
       @find_layout template, (err, layout_template) =>
         return @next(err) if err?
-        to_render.push(new awesomebox.View(file: layout_template, type: request_type, route: @, parent: to_render[0])) if layout_template?
+        to_render.push(new awesomebox.View(file: layout_template, type: @request_type, route: @, parent: to_render[0])) if layout_template?
         do_render()
 
 module.exports = Route

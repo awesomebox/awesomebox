@@ -1,0 +1,14 @@
+{
+  "name": "awesomebox-plugins",
+  "description": "awesomebox plugins for the client",
+  "version": "0.0.1",
+  "main": "index",
+  "engines": {
+    "node": ">= 0.6.0"
+  },
+  "dependencies": {
+    "open": "0.0.3",
+    "gaze": "~0.3.3",
+    "tiny-lr": "0.0.4"
+  }
+}
