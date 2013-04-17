@@ -1,4 +1,4 @@
-vm = require 'vm'
+Path = require 'path'
 {Module} = require 'module'
 {EventEmitter} = require 'events'
 
@@ -89,6 +89,24 @@ for k in Object.keys(consolidate) when k isnt 'clearCache'
     process: consolidate_render(k)
 
 
+doSeries = (fn) ->
+  ->
+    args = Array::slice.call(arguments)
+    fn.apply(null, [async.eachSeries].concat(args))
+
+_first = (eachfn, arr, iterator, main_callback) ->
+  eachfn arr, (x, callback) ->
+    iterator x, (err, result) ->
+      return callback(err) if err?
+      return callback() unless result?
+      main_callback(null, result)
+      main_callback = ->
+  , main_callback
+
+firstSeries = doSeries(_first)
+
+
+
 class View extends EventEmitter
   @find_template_file: (file, callback) ->
     file = walkabout(file)
@@ -108,6 +126,21 @@ class View extends EventEmitter
       _(files).find (f) -> f.filename.indexOf(filename) is 0 and (f.filename.length is filename.length or f.filename[filename.length] is '.')
     catch err
       null
+  
+  @find_layout_file: (file, callback) ->
+    
+    
+    find_layout: (root, callback) ->
+      relative = walkabout(awesomebox.path.layouts.join(require('path').relative(awesomebox.path.content.absolute_path, root.absolute_path)).dirname)
+
+      paths = [awesomebox.path.layouts.join('default.html')]
+      until relative.absolute_path is awesomebox.path.layouts.absolute_path
+        paths.unshift(walkabout(relative.absolute_path + '.html'))
+        relative = walkabout(relative.dirname)
+
+      firstSeries paths, (p, cb) =>
+        awesomebox.View.find_template_file(p, cb)
+      , callback
   
   constructor: (@opts = {}) ->
     @opts.route.view = @ unless @opts.parent?
@@ -129,7 +162,6 @@ class View extends EventEmitter
     not_supported = @opts.engines.filter (e) -> !ENGINES[e]?
     return callback(new Error("#{not_supported} view engine(s) are not supported")) unless not_supported.length is 0
     
-    # console.log 'requiring ' + require('util').inspect(@opts.engines)
     liverequire(@opts.engines.map((e) -> ENGINES[e].require), callback)
   
   render_through_engines: (callback) ->
@@ -254,5 +286,65 @@ class View extends EventEmitter
       @opts.done = true
       @emit('done')
       callback?(null, @opts.rendered_content)
+  
+  @configure: (opts) ->
+    {
+      render: (o, callback) =>
+        if typeof o is 'function'
+          callback = o
+          o = {}
+        @render(_(o).extend(opts), callback)
+    }
+  
+  @render: (opts, callback) ->
+    if typeof opts is 'function'
+      callback = opts
+      opts = {}
+    
+    opts.view_root = if opts.view_root? then walkabout(opts.view_root) else walkabout('views')
+    opts.layout_root = if opts.layout_root? then walkabout(opts.layout_root) else opts.view_root.join('layouts')
+    opts.layout_default_root ?= 'default'
+    opts.layout_default_root.replace(/\.+/, '')
+    opts.use_layouts ?= false
+    opts.path ?= ''
+    opts.path = [opts.path] unless Array.isArray(opts.path)
+    
+    opts.extra = _(opts).omit('view_root', 'layout_root', 'use_layouts', 'layout_default_root', 'path', 'parent', 'view_data')
+    opts = _(opts).omit(_(opts.extra).keys())
+    
+    opts.view_path = opts.path[0]
+    opts.view_type = Path.extname(opts.path[0]).replace(/^\.+/, '') or 'html'
+    
+    firstSeries opts.path.map((p) -> opts.view_root.join(p)), @find_template_file,  (err, template) =>
+      return callback(err) if err?
+      return callback() unless template?
+      
+      opts.view_template = template
+      opts.views = [new @(_({}).extend(opts.extra, {file: template, type: opts.view_type}))]
+      
+      do_render = ->
+        async.mapSeries opts.views, (v, cb) ->
+          v.render(cb)
+        , (err, data) ->
+          return callback(err) if err?
+          callback(null, _(data).last(), opts)
+      
+      return do_render() unless opts.use_layouts is true
+      
+      if opts.layout_path?
+        opts.layout_path = [opts.layout_path] unless Array.isArray(opts.layout_path)
+      else
+        relative = opts.layout_root.join(Path.relative(opts.view_root.absolute_path, opts.view_template.absolute_path)).directory()
+        opts.layout_path = [opts.layout_root.join(opts.layout_default_root + '.' + opts.view_type)]
+        until relative.absolute_path is opts.layout_root.absolute_path
+          opts.layout_path.unshift(walkabout(relative.absolute_path + '.' + opts.view_type))
+          relative = relative.directory()
+      
+      firstSeries opts.layout_path, @find_template_file, (err, layout_template) =>
+        return callback(err) if err?
+        if layout_template?
+          opts.layout_template = layout_template
+          opts.views.push(new @(_({}).extend(opts.extra ,file: layout_template, type: opts.view_type, parent: opts.views[0])))
+        do_render()
 
 module.exports = View
