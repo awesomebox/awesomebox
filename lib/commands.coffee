@@ -4,12 +4,10 @@ walkabout = require 'walkabout'
 Awesomebox = require 'awesomebox.node'
 
 client = (email, password) ->
-  return new Awesomebox(email: email, password: password) if email? and password?
+  return new Awesomebox(base_url: process.env.AWESOMEBOX_URL, email: email, password: password) if email? and password?
   config = awesomebox.client_config
-  return new Awesomebox() unless config?.api_key?
-  new Awesomebox(api_key: config.api_key)
-
-
+  return new Awesomebox(base_url: process.env.AWESOMEBOX_URL) unless config?.api_key?
+  new Awesomebox(base_url: process.env.AWESOMEBOX_URL, api_key: config.api_key)
 
 exports.run = (callback) ->
   async = require 'async'
@@ -166,3 +164,6 @@ exports.apps =
   list: (cb) -> client().apps.list print_result(cb)
   create: (name, cb) -> client().apps.create name, print_result(cb)
 exports.apps.create.command = 'create <name>'
+
+exports.info = (cb) ->
+  print_result(cb)(null, awesomebox.config)
