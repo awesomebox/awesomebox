@@ -26,7 +26,7 @@ consolidate_render = (engine) ->
     _(view_data).extend(
       box: {
         view: view
-        route: view.opts.route
+        # route: view.opts.route
         content: view.content.bind(view)
         data: view.data.bind(view)
       }
@@ -127,26 +127,11 @@ class View extends EventEmitter
     catch err
       null
   
-  @find_layout_file: (file, callback) ->
-    
-    
-    find_layout: (root, callback) ->
-      relative = walkabout(awesomebox.path.layouts.join(require('path').relative(awesomebox.path.content.absolute_path, root.absolute_path)).dirname)
-
-      paths = [awesomebox.path.layouts.join('default.html')]
-      until relative.absolute_path is awesomebox.path.layouts.absolute_path
-        paths.unshift(walkabout(relative.absolute_path + '.html'))
-        relative = walkabout(relative.dirname)
-
-      firstSeries paths, (p, cb) =>
-        awesomebox.View.find_template_file(p, cb)
-      , callback
-  
   constructor: (@opts = {}) ->
-    @opts.route.view = @ unless @opts.parent?
-    awesomebox.Plugins.wrap(@,
-      'view.render': 'do_render'
-    )
+    if awesomebox.Plugins.context?
+      awesomebox.Plugins.wrap(@,
+        'view.render': 'do_render'
+      )
   
   fetch_content: (callback) ->
     return callback() if @opts.content?
@@ -217,18 +202,18 @@ class View extends EventEmitter
       placeholder = "<[PARTIAL-#{PARTIAL_NUMBER++}]>"
       
       if partial[0] is '/'
-        partial_path = awesomebox.path.content.join(partial)
+        partial_path = @opts.paths.view.join(partial)
       else
         partial_path = @opts.file.directory().join(partial)
       
       partial_path = partial_path.directory().join('_' + partial_path.filename + '.' + @opts.type)
       
-      if require('path').relative(awesomebox.path.content.absolute_path, partial_path.absolute_path).indexOf('..') isnt -1
+      if require('path').relative(@opts.paths.view.absolute_path, partial_path.absolute_path).indexOf('..') isnt -1
         awesomebox.logger.error 'No content file at ' + partial_path.path
         return ''
       
       # Push incomplete view so that parent will wait
-      view = new View(type: @opts.type, route: @opts.route, parent: @, placeholder: placeholder, view_data: data)
+      view = new View(type: @opts.type, parent: @, placeholder: placeholder, view_data: data)
       @opts.placeholders.push(view)
       
       View.find_template_file partial_path, (err, template) =>
@@ -270,7 +255,6 @@ class View extends EventEmitter
       (cb) => @install_engines(cb)
       (cb) => @render_through_engines(cb)
       (cb) => @wait_for_placeholders(cb)
-      # (cb) => @after_render(cb)
       (cb) => @load_cheerio(cb)
     ], callback
   
@@ -309,25 +293,25 @@ class View extends EventEmitter
     opts.path ?= ''
     opts.path = [opts.path] unless Array.isArray(opts.path)
     
-    opts.extra = _(opts).omit('view_root', 'layout_root', 'use_layouts', 'layout_default_root', 'path', 'parent', 'view_data')
+    opts.extra = _(opts).omit('view_root', 'layout_root', 'use_layouts', 'layout_default_root', 'layout_path', 'path', 'parent', 'view_data')
     opts = _(opts).omit(_(opts.extra).keys())
     
     opts.view_path = opts.path[0]
     opts.view_type = Path.extname(opts.path[0]).replace(/^\.+/, '') or 'html'
     
-    firstSeries opts.path.map((p) -> opts.view_root.join(p)), @find_template_file,  (err, template) =>
-      return callback(err) if err?
-      return callback() unless template?
+    firstSeries opts.path.map((p) -> opts.view_root.join(p)), @find_template_file, (err, template) =>
+      return callback?(err, null, opts) if err?
+      return callback?(null, null, opts) unless template?
       
       opts.view_template = template
-      opts.views = [new @(_({}).extend(opts.extra, {file: template, type: opts.view_type}))]
+      opts.views = [new @(_({}).extend(opts.extra, {file: template, type: opts.view_type, view_data: opts.view_data, paths: {view: opts.view_root, layout: opts.layout_root}}))]
       
       do_render = ->
         async.mapSeries opts.views, (v, cb) ->
           v.render(cb)
         , (err, data) ->
-          return callback(err) if err?
-          callback(null, _(data).last(), opts)
+          return callback?(err, null, opts) if err?
+          callback?(null, _(data).last(), opts)
       
       return do_render() unless opts.use_layouts is true
       
@@ -341,10 +325,10 @@ class View extends EventEmitter
           relative = relative.directory()
       
       firstSeries opts.layout_path, @find_template_file, (err, layout_template) =>
-        return callback(err) if err?
+        return callback?(err, null, opts) if err?
         if layout_template?
           opts.layout_template = layout_template
-          opts.views.push(new @(_({}).extend(opts.extra ,file: layout_template, type: opts.view_type, parent: opts.views[0])))
+          opts.views.push(new @(_({}).extend(opts.extra , {file: layout_template, type: opts.view_type, view_data: opts.view_data, parent: opts.views[0], paths: {view: opts.view_root, layout: opts.layout_root}})))
         do_render()
 
 module.exports = View

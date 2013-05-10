@@ -1,0 +1,8 @@
+{
+  "name": "awesomebox-ui",
+  "main": "index.html",
+  "window": {
+    "show": true,
+    "toolbar": false
+  }
+}

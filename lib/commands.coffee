@@ -146,3 +146,23 @@ exports.domains =
       return print_error(err) if err?
       console.log data
       callback()
+
+print_result = (callback, format) ->
+  (err, data) ->
+    if err?
+      print_error(err)
+      return callback(err)
+    
+    if typeof format is 'function'
+      console.log format(data)
+    else if typeof format is 'string'
+      console.log format
+    else if !format?
+      console.log data
+    
+    callback(null, data)
+
+exports.apps =
+  list: (cb) -> client().apps.list print_result(cb)
+  create: (name, cb) -> client().apps.create name, print_result(cb)
+exports.apps.create.command = 'create <name>'

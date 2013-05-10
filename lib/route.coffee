@@ -21,6 +21,7 @@ class Route
     paths.unshift(Path.join(@req.url, 'index.html')) if Path.extname(@req.url) is ''
     
     View.render {path: paths, route: @}, (err, data, view_opts) =>
+      @req.awesomebox.view_opts = view_opts
       if err?
         return @next(err) unless err.code in ['EISDIR']
         return @next()
