@@ -1,3 +1,5 @@
+_ = require 'underscore'
+
 unless global.awesomebox
   Module = require('module').Module
   path = process.env.NODE_PATH or ''
@@ -19,7 +21,7 @@ unless global.awesomebox
     }
   }
   
-  awesomebox.config_file = awesomebox.path.root.join('awesomebox.json')
+  awesomebox.config_file = awesomebox.path.root.join('.awesomebox.json')
   awesomebox.default_config = require '../templates/default.awesomebox.json'
   awesomebox.logger = new awesomebox.Logger('awesomebox')
   awesomebox.Server = require './server'
@@ -35,7 +37,8 @@ awesomebox.__defineGetter__ 'name', ->
 awesomebox.__defineGetter__ 'config', ->
   try
     config = awesomebox.config_file.read_file_sync()
-    JSON.parse(config)
+    config = JSON.parse(config)
+    _(awesomebox.default_config).extend(config)
   catch e
     return awesomebox.default_config if e.code is 'ENOENT'
     awesomebox.logger.error 'An error occurred while parsing your awesomebox.json file'
@@ -43,7 +46,7 @@ awesomebox.__defineGetter__ 'config', ->
 
 awesomebox.__defineSetter__ 'config', (config) ->
   try
-    awesomebox.config_file.writefile_sync(JSON.stringify(config, null, 2))
+    awesomebox.config_file.write_file_sync(JSON.stringify(config, null, 2))
   catch e
 
 awesomebox.__defineGetter__ 'client_config', ->

@@ -17,6 +17,8 @@ class PluginContext
     m = instance[method]
     
     instance[method] = =>
+      console.log 'Emit: ' + event_name
+      
       args = Array::slice.call(arguments)
       callback = _(args).last()
       if typeof callback is 'function'

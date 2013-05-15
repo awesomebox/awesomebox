@@ -1,4 +1,5 @@
 #!/usr/bin/env node
 
 require('coffee-script');
-require('../lib/cli')();
+// require('../lib/cli')();
+require('../lib/command_line');

@@ -27,7 +27,10 @@ module.exports = (context, done) ->
     next()
   
   context.on 'post:view.render', (view, args, results, next) ->
-    view.opts.$('head').append(create_snippet()) if view.opts.$?
+    if view.opts.$?
+      $node = view.opts.$('head')
+      $node = view.opts.$.root() if $node.length is 0
+      $node.append(create_snippet())
     next()
   
   done()
