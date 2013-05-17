@@ -97,7 +97,7 @@ class Commandment
       return true if node.args is '...'
       node_args = node.args
       node_args = [node_args] unless Array.isArray(node_args)
-      node_args = _(node_args).compact()
+      node_args = _(node_args).compact().filter (a) -> a[0] isnt '~'
       return true if node_args.length is args.length
       false
     

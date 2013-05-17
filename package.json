@@ -23,9 +23,7 @@
   ],
   "main": "index.js",
   "bin": {
-    "awesomebox": "./bin/awesomebox",
-    "awesomebox-domains": "./bin/awesomebox-domains",
-    "awesomebox-generate": "./bin/awesomebox-generate"
+    "awesomebox": "./bin/awesomebox"
   },
   "engines": {
     "node": ">= 0.8.0"

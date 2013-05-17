@@ -12,6 +12,4 @@ Domains
 
 exports.args = 'domain'
 exports.execute = (context, domain, callback) ->
-  config = awesomebox.config
-  
-  context.client().app(config.name).domains.add(domain, callback)
+  context.client().app(awesomebox.name).domains.add(domain, callback)

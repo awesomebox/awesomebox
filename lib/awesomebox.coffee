@@ -31,34 +31,49 @@ unless global.awesomebox
   
   awesomebox.commands = require './commands'
 
+cache = {}
+
+awesomebox.__defineGetter__ 'is_config_valid', ->
+  config = awesomebox.config
+  config?.user? and config?.name?
+
+awesomebox.__defineGetter__ 'user', ->
+  awesomebox.config.user
+
 awesomebox.__defineGetter__ 'name', ->
-  awesomebox.config.name ? awesomebox.path.root.filename
+  awesomebox.config.name
 
 awesomebox.__defineGetter__ 'config', ->
-  try
-    config = awesomebox.config_file.read_file_sync()
-    config = JSON.parse(config)
-    _(awesomebox.default_config).extend(config)
-  catch e
-    return awesomebox.default_config if e.code is 'ENOENT'
-    awesomebox.logger.error 'An error occurred while parsing your awesomebox.json file'
-    process.exit(1)
+  unless cache.config?
+    try
+      config = awesomebox.config_file.read_file_sync()
+      config = JSON.parse(config)
+      cache.config = _({}).extend(awesomebox.default_config, config)
+    catch e
+      return awesomebox.default_config if e.code is 'ENOENT'
+      awesomebox.logger.error 'An error occurred while parsing your awesomebox.json file'
+      process.exit(1)
+  cache.config
 
 awesomebox.__defineSetter__ 'config', (config) ->
   try
     awesomebox.config_file.write_file_sync(JSON.stringify(config, null, 2))
+    delete cache.config
   catch e
 
 awesomebox.__defineGetter__ 'client_config', ->
-  try
-    config = walkabout(process.env.HOME).join('.awesomebox').read_file_sync()
-    JSON.parse(config)
-  catch e
-    {}
+  unless cache.client_config?
+    try
+      config = walkabout(process.env.HOME).join('.awesomebox').read_file_sync()
+      cache.client_config = JSON.parse(config)
+    catch e
+      return {}
+  cache.client_config
 
 awesomebox.__defineSetter__ 'client_config', (config) ->
   try
     walkabout(process.env.HOME).join('.awesomebox').write_file_sync(JSON.stringify(config, null, 2))
+    delete cache.client_config
   catch e
 
 module.exports = global.awesomebox
