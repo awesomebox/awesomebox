@@ -5,12 +5,10 @@ exports.user_data =
 Versions
 -------------
 <% data.forEach(function(version) { %>
-<%= version.version_name -%>: <%= new Date(version.created_at) -%>
+<%= version.running ? '*' : ' ' %> <%= version.instance.version_name -%>: <%= new Date(version.instance.created_at) -%>
 <% }) %>
 
 '''
 
 exports.execute = (context, callback) ->
-  config = awesomebox.config
-  
-  context.client().app(config.name).versions.list(callback)
+  context.client().app(awesomebox.name).versions.list(callback)

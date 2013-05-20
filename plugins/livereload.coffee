@@ -10,15 +10,15 @@ create_snippet = (port = 35729) ->
   '''.replace('#{port}', port)
 
 module.exports = (context, done) ->
-  context.on 'post:server.initialize', (server, args, results, next) ->
+  # context.on 'post:server.initialize', (server, args, results, next) ->
+  #   next()
+  
+  context.on 'post:server.start', (server, args, results, next) ->
     server.lr_server = new LivereloadServer()
     
     server.gaze = new Gaze(['content/**', 'layouts/**', 'data/**'])
     server.gaze.on 'changed', (path) -> server.lr_server.changed(body:{files: [path]})
     
-    next()
-  
-  context.on 'post:server.start', (server, args, results, next) ->
     server.lr_server.listen(35729, next)
   
   context.on 'post:server.stop', (server, args, results, next) ->

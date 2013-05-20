@@ -37,7 +37,7 @@ class Commandment
       parts.push(command) if file.basename isnt 'index'
       node = @create_path(parts)
       
-      for k in ['execute', 'description', 'alias', 'args', 'opts', 'user_data']
+      for k in ['execute', 'description', 'alias', 'args', 'opts', 'user_data', 'hidden']
         node[k] = o[k] if o[k]
     
     parse_dir = (dir) ->
@@ -66,12 +66,13 @@ class Commandment
       for k in _(node.children).keys().sort()
         current_node = node.children[k]
         
-        args = current_node.args
-        args = [args] unless Array.isArray(args)
-        args = _(args).compact()
-        args = args.map((a) -> "[#{a}]") if current_node.args isnt '...'
+        unless current_node.hidden is true
+          args = current_node.args
+          args = [args] unless Array.isArray(args)
+          args = _(args).compact()
+          args = args.map((a) -> "[#{a}]") if current_node.args isnt '...'
         
-        console.log '    ' + pad_right([current_node.name].concat(args).join(' '), 20) + (current_node.description or '')
+          console.log '    ' + pad_right([current_node.name].concat(args).join(' '), 20) + (current_node.description or '')
     
     console.log()
     console.log "  ===== #{@name} v#{@version} ====="
