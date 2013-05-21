@@ -1,7 +1,7 @@
 {
   "name": "awesomebox",
   "description": "The box that is awesome",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "homepage": "https://github.com/mattinsler/awesomebox",
   "author": {
     "name": "Matt Insler",
@@ -52,7 +52,8 @@
     "ejs": "~0.8.4",
     "open": "0.0.3",
     "gaze": "~0.3.3",
-    "tiny-lr": "0.0.4"
+    "tiny-lr": "0.0.4",
+    "mmmagic": "~0.3.1"
   },
   "devDependencies": {},
   "keywords": []

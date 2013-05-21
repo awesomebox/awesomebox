@@ -2,6 +2,10 @@ Path = require 'path'
 {Module} = require 'module'
 {EventEmitter} = require 'events'
 
+mmm = require 'mmmagic'
+Magic = mmm.Magic
+magic = new Magic(mmm.MAGIC_MIME_TYPE | mmm.MAGIC_MIME_ENCODING)
+
 _ = require 'underscore'
 async = require 'async'
 cheerio = require 'cheerio'
@@ -259,17 +263,26 @@ class View extends EventEmitter
     ], callback
   
   render: (callback) ->
-    rfilename = @opts.file.filename.split('.').reverse()
-    @opts.engines = rfilename[0...rfilename.indexOf(@opts.type)]
-    @opts.placeholders = []
-    @opts.view_data ?= {}
+    magic.detectFile @opts.file.absolute_path, (err, magic_data) =>
+      return callback(err) if err?
+      
+      [@opts.mime_type, @opts.mime_encoding] = magic_data.split(';')
+      @opts.mime_type = @opts.mime_type.trim()
+      @opts.mime_encoding = @opts.mime_encoding.trim().replace(/^charset=/, '')
     
-    @do_render (err) =>
-      return callback?(err) if err?
-      @opts.rendered_content = @opts.$.html() if @opts.$?
-      @opts.done = true
-      @emit('done')
-      callback?(null, @opts.rendered_content)
+      rfilename = @opts.file.filename.split('.').reverse()
+      @opts.engines = rfilename[0...rfilename.indexOf(@opts.type)]
+      @opts.placeholders = []
+      @opts.view_data ?= {}
+      
+      return callback?() unless /^text\//.test(@opts.mime_type)
+      
+      @do_render (err) =>
+        return callback?(err) if err?
+        @opts.rendered_content = @opts.$.html() if @opts.$?
+        @opts.done = true
+        @emit('done')
+        callback?(null, @opts.rendered_content)
   
   @configure: (opts) ->
     {
