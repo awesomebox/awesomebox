@@ -11,6 +11,4 @@ Domains
 '''
 
 exports.execute = (context, callback) ->
-  config = awesomebox.config
-  
-  context.client().app(config.name).domains.list(callback)
+  context.client().app(awesomebox.name).domains.list(callback)

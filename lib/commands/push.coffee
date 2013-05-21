@@ -15,7 +15,7 @@ exports.execute = (context, callback) ->
   create_package (err, filename) ->
     return callback(err) if err?
     
-    awesomebox.logger.log 'Deploying ' + config.name
+    awesomebox.logger.log 'Deploying ' + awesomebox.name
     
     context.client().app(awesomebox.name).update filename, (err, data) ->
       walkabout(filename).unlink_sync()

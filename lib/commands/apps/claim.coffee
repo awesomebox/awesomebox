@@ -7,8 +7,7 @@ exports.opts = {
 }
 
 exports.execute = (context, app_name, callback) ->
-  config = awesomebox.config
-  return callback(new Error("App #{config.user} - #{config.name} is already claimed")) if config?.user? and config?.name?
+  return callback(new Error("App #{awesomebox.user} - #{awesomebox.name} is already claimed")) if awesomebox.is_config_valid
   
   context.client().app(app_name).get (err, data) ->
     return callback(err) if err?
