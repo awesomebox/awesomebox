@@ -9,7 +9,7 @@ exports.pack = (package_dir, zip_file, callback) ->
   fstream.Reader(
     type: 'Directory'
     path: walkabout(package_dir).absolute_path
-    filter: -> @basename[0] isnt '.' and @basename not in ['node_modules', 'components']
+    # filter: -> @basename[0] isnt '.' and @basename not in ['node_modules', 'components']
   )
   .pipe(tar.Pack(noProprietary: true))
   .pipe(zlib.Gzip())
