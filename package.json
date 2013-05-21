@@ -1,7 +1,7 @@
 {
   "name": "awesomebox",
   "description": "The box that is awesome",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "homepage": "https://github.com/mattinsler/awesomebox",
   "author": {
     "name": "Matt Insler",
@@ -32,7 +32,6 @@
     "coffee-script": "~1.6.2",
     "walkabout": "~0.1.4",
     "express": "~3.2.4",
-    "connect-flash": "~0.1.1",
     "underscore": "~1.4.4",
     "async": "~0.2.8",
     "npm": "~1.2.21",

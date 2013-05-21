@@ -1,6 +1,6 @@
 {EventEmitter} = require 'events'
 express = require 'express'
-flash = require 'connect-flash'
+# flash = require 'connect-flash'
 walkabout = require 'walkabout'
 portfinder = require 'portfinder'
 
@@ -20,15 +20,13 @@ class Server extends EventEmitter
     callback()
   
   configure_middleware: (callback) ->
-    @http.use (req, res, next) ->
-      console.log "#{req.method} #{req.url}"
-      next()
+    @http.use express.logger()
     @http.use express.compress()
-    @http.use express.bodyParser()
-    @http.use express.methodOverride()
-    @http.use express.cookieParser()
-    @http.use express.session(secret: 'hohgah5Weegi0zae6vookaehoo0ieQu5')
-    @http.use flash()
+    # @http.use express.bodyParser()
+    # @http.use express.methodOverride()
+    # @http.use express.cookieParser()
+    # @http.use express.session(secret: 'hohgah5Weegi0zae6vookaehoo0ieQu5')
+    # @http.use flash()
     @http.use @route.bind(@)
     @http.use express.static(awesomebox.path.content.absolute_path)
     callback()
