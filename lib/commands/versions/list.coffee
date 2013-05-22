@@ -5,7 +5,7 @@ exports.user_data =
 Versions
 -------------
 <% data.forEach(function(version) { %>
-<%= version.running ? '*' : ' ' %> <%= version.instance.version_name -%>: <%= new Date(version.instance.created_at) -%>
+<%= version.running ? '*' : ' ' %><%= version.instance.is_blessed ? '-' : ' ' %> <%= version.instance.version_name -%>: <%= new Date(version.instance.created_at) -%>
 <% }) %>
 
 '''
