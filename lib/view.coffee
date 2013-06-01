@@ -2,10 +2,6 @@ Path = require 'path'
 {Module} = require 'module'
 {EventEmitter} = require 'events'
 
-mmm = require 'mmmagic'
-Magic = mmm.Magic
-magic = new Magic(mmm.MAGIC_MIME_TYPE | mmm.MAGIC_MIME_ENCODING)
-
 _ = require 'underscore'
 async = require 'async'
 cheerio = require 'cheerio'
@@ -263,6 +259,10 @@ class View extends EventEmitter
     ], callback
   
   render: (callback) ->
+    mmm = require 'mmmagic'
+    Magic = mmm.Magic
+    magic = new Magic(mmm.MAGIC_MIME_TYPE | mmm.MAGIC_MIME_ENCODING)
+    
     magic.detectFile @opts.file.absolute_path, (err, magic_data) =>
       return callback(err) if err?
       
