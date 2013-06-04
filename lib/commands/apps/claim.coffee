@@ -1,6 +1,6 @@
 exports.args = 'app-name'
 exports.user_data =
-  success_format: 'App <%= data.user %> - <%= name %> has successfully been claimed!'
+  success_format: 'App <%= user %> - <%= name %> has successfully been claimed!'
 
 exports.opts = {
   'force': 'f'

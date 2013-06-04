@@ -11,19 +11,18 @@ $ npm install -g awesomebox
 ## Directory Structure
 
 ```
-- awesomebox.json                    # Awesomebox configuration file (optional)
-  |- content
-     |- index.html                   # Will be rendered for / or /index or /index.html
-     |- posts
-        |- index.html                # Will be rendered for /posts or /posts/index or /posts/index.html
-        |- post-1.html
-        |- post-2.html.ejs
-  |- layouts
-     |- default.html.ejs             # Default layout
-     |- posts.html.ejs               # Layout for posts directory
-  |- data
-     |- identity.yml
-     |- blog_posts.json
+- content
+  |- index.html                   # Will be rendered for / or /index or /index.html
+  |- posts
+    |- index.html                # Will be rendered for /posts or /posts/index or /posts/index.html
+    |- post-1.html
+    |- post-2.html.ejs
+- layouts
+  |- default.html.ejs             # Default layout
+  |- posts.html.ejs               # Layout for posts directory
+- data
+  |- identity.yml
+  |- blog_posts.json
 ```
 
 ## The `box` Object
