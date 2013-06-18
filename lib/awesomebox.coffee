@@ -76,4 +76,29 @@ awesomebox.__defineSetter__ 'client_config', (config) ->
     delete cache.client_config
   catch e
 
+{spawn} = require 'child_process'
+walkabout = require 'walkabout'
+AWESOMEBOX_PATH = walkabout(__dirname).join('../bin/awesomebox').absolute_path
+
+awesomebox.spawn = (directory, callback) ->
+  directory = walkabout(directory)
+  proc = spawn(AWESOMEBOX_PATH, ['run'], cwd: directory.absolute_path)
+  on_exit = -> proc?.kill()
+  process.on('exit', on_exit)
+  proc.on 'close', -> process.removeListener('exit', on_exit)
+  
+  rx = /Listening on port ([0-9]+)/
+  logs = ''
+  on_data = (data) ->
+    logs += data.toString()
+    match = rx.exec(logs)
+    if match?
+      callback(null, parseInt(match[1]))
+      proc.stdout.removeListener('data', on_data)
+      logs = null
+  
+  proc.stdout.on('data', on_data)
+  
+  proc
+
 module.exports = global.awesomebox
