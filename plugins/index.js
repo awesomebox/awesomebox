@@ -15,6 +15,10 @@ fs.readdirSync(__dirname).forEach(function(file) {
 
 module.exports = function(context, done) {
   async.eachSeries(plugins, function(plugin, cb) {
-    plugin(context, cb);
+    if (typeof plugin === 'function') {
+      plugin(context, cb);
+    } else {
+      cb();
+    }
   }, done);
 };
