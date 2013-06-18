@@ -15,12 +15,20 @@ class Route
   constructor: (@req, @res, @next) ->
     @req.awesomebox ?= {}
     @req.awesomebox.route = @
+    
+    if awesomebox.Plugins.context?
+      awesomebox.Plugins.wrap(@,
+        'route.render': 'render'
+      )
+  
+  render: (url, callback) ->
+    paths = [url]
+    paths.unshift(Path.join(url, 'index.html')) if Path.extname(url) is ''
+    
+    View.render({path: paths, route: @}, callback)
   
   respond: ->
-    paths = [@req.url]
-    paths.unshift(Path.join(@req.url, 'index.html')) if Path.extname(@req.url) is ''
-    
-    View.render {path: paths, route: @}, (err, data, view_opts) =>
+    @render @req.url, (err, data, view_opts) =>
       @req.awesomebox.view_opts = view_opts
       if err?
         return @next(err) unless err.code in ['EISDIR']
@@ -28,6 +36,7 @@ class Route
       return @next() unless data?
       
       @res.set('Content-Type': mime.lookup(view_opts.view_type))
-      @res.send(data)
+      # @res.send(data)
+      @res.send(_(view_opts.views).last().opts.rendered_content)
 
 module.exports = Route
