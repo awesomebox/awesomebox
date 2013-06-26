@@ -15,11 +15,17 @@ unless global.awesomebox
     root: walkabout(__dirname).join('..')
     path: {
       root: walkabout()
-      data: walkabout('data')
-      content: walkabout('content')
-      layouts: walkabout('layouts')
     }
   }
+  
+  if awesomebox.path.root.join('content').exists_sync()
+    awesomebox.path.data = awesomebox.path.root.join('data')
+    awesomebox.path.content = awesomebox.path.root.join('content')
+    awesomebox.path.layouts = awesomebox.path.root.join('layouts')
+  else
+    awesomebox.path.data = awesomebox.path.root.join('data')
+    awesomebox.path.content = awesomebox.path.root
+    awesomebox.path.layouts = awesomebox.path.root.join('layouts')
   
   awesomebox.config_file = awesomebox.path.root.join('.awesomebox.json')
   awesomebox.default_config = require '../templates/default.awesomebox.json'
