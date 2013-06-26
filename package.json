@@ -1,7 +1,7 @@
 {
   "name": "awesomebox",
   "description": "The box that is awesome",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "homepage": "https://github.com/mattinsler/awesomebox",
   "author": {
     "name": "Matt Insler",
@@ -29,7 +29,7 @@
     "node": ">= 0.8.0"
   },
   "dependencies": {
-    "awesomebox.node": "~0.0.6",
+    "awesomebox.node": "latest",
     "coffee-script": "~1.6.2",
     "walkabout": "~0.1.4",
     "express": "~3.2.4",
