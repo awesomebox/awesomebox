@@ -9,4 +9,6 @@ exports.execute = (context, callback) ->
     (cb) -> server.start(cb)
   ], (err) ->
     return callback(err) if err?
+    
+    awesomebox.logger.log 'Listening on port ' + server.address.port
     callback()

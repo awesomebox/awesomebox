@@ -30,5 +30,9 @@ commandment.context =
 # console.log require('eyes').inspect(commandment.root)
 # commandment.help()
 
-awesomebox.Plugins.initialize ->
-  commandment.execute(process.argv.slice(2))
+# console.log 'init plugins'
+# awesomebox.Plugins.initialize ->
+#   console.log 'execute'
+#   commandment.execute(process.argv.slice(2))
+
+commandment.execute(process.argv.slice(2))
