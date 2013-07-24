@@ -1,8 +1,5 @@
-mime = require 'mime'
 walkabout = require 'walkabout'
 {ViewPipeline, HttpSink} = require './view_pipeline'
-
-debug = require('debug')('awesomebox:route')
 
 class Route
   constructor: (@req, @res, @next) ->
