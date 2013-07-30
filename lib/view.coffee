@@ -1,6 +1,7 @@
 mime = require 'mime'
-walkabout = require 'walkabout'
+async = require 'async'
 express = require 'express'
+walkabout = require 'walkabout'
 tubing = require 'tubing'
 tubing_view = require 'tubing-view'
 {RenderPipeline, LayoutPipeline} = require './view_pipeline'
@@ -41,14 +42,63 @@ add_cheerio = (cmd, done) ->
   done()
 
 write_cheerio_content = (cmd, done) ->
-  return unless cmd.cheerio?
+  return done() unless cmd.cheerio?
   
   cmd.content = cmd.cheerio.html()
   done()
 
+compile_script_tags = (cmd, done) ->
+  return done() unless cmd.cheerio?
+  
+  async.each cmd.cheerio('script[type]').toArray(), (el, cb) ->
+    $el = cmd.cheerio(el)
+    type = $el.attr('type')
+    
+    tubing_view.Engines.install_engine_by_attr_type type, (err) ->
+      return cb(err) if err?
+    
+      tubing_view.Engines.render_by_attr_type type, $el.html(), {}, (err, content) ->
+        return cb(err) if err?
+        
+        script = '<script type="text/javascript"'
+        script += ' ' + k + '="' + v + '"' for k, v of el.attribs when k isnt 'type'
+        script += '>' + content + '</script>'
+        
+        $el.replaceWith(script)
+        cb()
+  , done
+
+compile_style_tags = (cmd, done) ->
+  return done() unless cmd.cheerio?
+  
+  async.each cmd.cheerio('style[type]').toArray(), (el, cb) ->
+    $el = cmd.cheerio(el)
+    type = $el.attr('type')
+    
+    tubing_view.Engines.install_engine_by_attr_type type, (err) ->
+      return cb(err) if err?
+    
+      tubing_view.Engines.render_by_attr_type type, $el.html(), {}, (err, content) ->
+        return cb(err) if err?
+        
+        script = '<style type="text/css"'
+        script += ' ' + k + '="' + v + '"' for k, v of el.attribs when k isnt 'type'
+        script += '>' + content + '</style>'
+        
+        $el.replaceWith(script)
+        cb()
+  , done
+
 ExtraPipeline = tubing.pipeline()
   .then(add_cheerio)
+  .then(compile_script_tags)
+  .then(compile_style_tags)
   .then(write_cheerio_content)
+
+# debug = (msg) ->
+#   (cmd, done) ->
+#     console.log (cmd?.path or ''), (cmd?.content_type or ''), msg
+#     done()
 
 HttpPipeline = tubing.pipeline('Http Pipeline')
   .then(configure_paths)
@@ -56,7 +106,7 @@ HttpPipeline = tubing.pipeline('Http Pipeline')
   .then(RenderPipeline)
   .then(tubing.exit_unless('resolved'))
   .then(LayoutPipeline)
-  .then (cmd) -> ExtraPipeline.configure(@config).push(cmd)
+  .then((cmd) -> ExtraPipeline.configure(@config).push(cmd))
 
 FileRenderPipeline = tubing.pipeline()
   .then(RenderPipeline)

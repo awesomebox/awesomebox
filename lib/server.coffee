@@ -7,12 +7,12 @@ Route = require './route'
 View = require './view'
 
 livereload = require('./plugins/livereload')()
-mixpanel = require('./plugins/mixpanel')()
+# mixpanel = require('./plugins/mixpanel')()
 
 class Server extends EventEmitter
   constructor: ->
     @http = express()
-    @plugins = [livereload, mixpanel]
+    @plugins = [livereload]
     @__defineGetter__ 'address', => @raw_http.address()
   
   initialize: (callback) ->

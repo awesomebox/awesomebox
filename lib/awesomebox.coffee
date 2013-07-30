@@ -1,3 +1,6 @@
+# process.on 'uncaughtException', (err) ->
+#   console.log(err.stack)
+
 walkabout = require 'walkabout'
 
 awesomebox = {

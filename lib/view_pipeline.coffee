@@ -5,21 +5,6 @@ tubing_view = require 'tubing-view'
 
 Parsers = require './parsers'
 
-npm_install = (pkg, version, callback) ->
-  if typeof version is 'function'
-    callback = version
-    version = null
-  
-  pkg = "#{pkg}@#{version}" if version?
-  
-  npm = require 'npm'
-  npm.load {prefix: process.cwd() + '/node_modules'}, (err) ->
-    return callback(err) if err?
-    
-    npm.commands.install [pkg], (err, data) ->
-      return callback(err) if err?
-      callback()
-
 box_raw_data = (path) ->
   data_path = tubing_view.utils.resolve_path_from_root_sync(@config.path.data, path)
   return throw new Error('No data file available at ' + path) unless data_path?
@@ -92,19 +77,11 @@ exports.configure = (cmd, done) ->
   done()
 
 exports.install_engines = (cmd, done) ->
-  engines = _.chain(cmd.engines).map((e) -> tubing_view.Engines.get_engine(e).dependencies).flatten().uniq().value()
-  return done() if engines.length is 0
+  return done() if cmd.engines is 0
   
-  async.each engines, (e, cb) ->
-    try
-      res = require.resolve(process.cwd() + '/node_modules/' + e)
-      return npm_install(e, cb) unless require('path').relative(process.cwd(), res).indexOf('..') is -1
-      cb()
-    catch err
-      npm_install(e, cb)
-  , (err) ->
-    return done(err) if err?
-    done()
+  async.each cmd.engines, (e, cb) ->
+    tubing_view.Engines.install_engine_by_ext(e, cb)
+  , done
 
 exports.wait_for_placeholders = (cmd, done) ->
   check = =>
