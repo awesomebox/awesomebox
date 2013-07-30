@@ -1,7 +1,7 @@
 {
   "name": "awesomebox",
   "description": "The box that is awesome",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "homepage": "https://github.com/mattinsler/awesomebox",
   "author": {
     "name": "Matt Insler",
@@ -29,31 +29,20 @@
     "node": ">= 0.8.0"
   },
   "dependencies": {
-    "awesomebox.node": "latest",
     "coffee-script": "~1.6.2",
     "walkabout": "~0.1.4",
     "express": "~3.2.4",
     "underscore": "~1.4.4",
     "async": "~0.2.8",
     "npm": "~1.2.21",
-    "colors": "~0.6.0-1",
-    "consolidate": "~0.9.1",
     "mime": "~1.2.9",
     "cheerio": "~0.11.0",
     "portfinder": "~0.2.1",
-    "tar": "~0.1.17",
-    "fstream": "~0.1.22",
-    "request": "~2.21.0",
-    "read": "https://github.com/mattinsler/read/tarball/master",
-    "moment": "~2.0.0",
-    "connect-compiler": "~0.1.2",
-    "ejs": "~0.8.4",
     "open": "0.0.3",
-    "gaze": "~0.3.3",
     "tiny-lr": "0.0.4",
-    "mmmagic": "~0.3.1",
-    "tubing": "0.0.3",
-    "tubing-view": "0.0.1"
+    "tubing": "0.0.4",
+    "tubing-view": "0.0.2",
+    "chokidar": "~0.6.2"
   },
   "devDependencies": {},
   "keywords": []

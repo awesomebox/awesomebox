@@ -1,0 +1,8 @@
+<ul track="test">
+<% ['Bill', 'June', 'Laura'].forEach(function(name) { %>
+  <li><%= name %></li>
+<% }) %>
+</ul>
+
+<pre><%- box.data.raw('/foo') %></pre>
+<%- box.data('/foo').names %>

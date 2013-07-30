@@ -1,29 +1,34 @@
-walkabout = require 'walkabout'
-{ViewPipeline, HttpSink} = require './view_pipeline'
+View = require './view'
 
 class Route
-  constructor: (@req, @res, @next) ->
+  @respond: (req, res, next) ->
+    View.http_render(req, res, next)
   
-  respond: ->
-    root = walkabout()
-    content_exists = root.join('content').exists_sync()
+  @respond_error: (err, req, res, next) ->
+    return next(err) unless req.view.command.content_type is 'html'
     
-    pipeline = ViewPipeline.configure(
-      path:
-        content: if content_exists then root.join('content') else root
-        layouts: root.join('layouts')
-        data: root.join('data')
-      
-      enable_layouts: content_exists
-      enable_data: content_exists
-    )
+    code = err.status if err.status?
+    code = 500 if code < 400
+    code ?= 500
     
-    pipeline.publish_to(HttpSink)
+    data =
+      req: req
+      res: res
+      err: err
     
-    pipeline.push(
-      req: @req
-      res: @res
-      next: @next
-    )
+    View.render_file __dirname + '/templates/error', 'html', data, (err, content) ->
+      return next(err) if err?
+      View.send_response(res, code, 'html', content)
+  
+  @not_found: (req, res, next) ->
+    return next() unless req.view.command.content_type is 'html'
+    
+    data =
+      req: req
+      res: res
+    
+    View.render_file __dirname + '/templates/404', 'html', data, (err, content) ->
+      return next(err) if err?
+      View.send_response(res, 404, 'html', content)
 
 module.exports = Route

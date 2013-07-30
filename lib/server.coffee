@@ -1,12 +1,18 @@
 {EventEmitter} = require 'events'
+async = require 'async'
 express = require 'express'
 # flash = require 'connect-flash'
 portfinder = require 'portfinder'
-debug = require('debug')('awesomebox:server')
+Route = require './route'
+View = require './view'
+
+livereload = require('./plugins/livereload')()
+mixpanel = require('./plugins/mixpanel')()
 
 class Server extends EventEmitter
   constructor: ->
     @http = express()
+    @plugins = [livereload, mixpanel]
     @__defineGetter__ 'address', => @raw_http.address()
   
   initialize: (callback) ->
@@ -20,26 +26,41 @@ class Server extends EventEmitter
     # @http.use express.cookieParser()
     # @http.use express.session(secret: 'hohgah5Weegi0zae6vookaehoo0ieQu5')
     # @http.use flash()
-    @http.use @route.bind(@)
-    # @http.use express.static(awesomebox.path.content.absolute_path)
+    @http.use(Route.respond)
+    @http.use(Route.respond_error)
+    @http.use(Route.not_found)
     callback()
   
   configure: (callback) ->
+    for p in @plugins
+      View.add_pipe(p.view_pipe()) if p.view_pipe?
+    
     @configure_middleware(callback)
   
-  route: (req, res, next) ->
-    new awesomebox.Route(req, res, next).respond()
-  
   start: (callback) ->
+    portfinder.basePort = 8000
     portfinder.getPort (err, port) =>
       return callback(err) if err?
       @raw_http = @http.listen port, (err) =>
         return callback(err) if err?
-        @emit('listening')
-        callback()
+        
+        async.each @plugins, (p, cb) =>
+          return cb() unless p.start?
+          p.start(server: @, cb)
+        , (err) =>
+          return callback(err) if err?
+          
+          @emit('listening')
+          callback()
   
   stop: (callback) ->
-    @http.close()
-    callback()
+    async.each @plugins, (p, cb) =>
+      return cb() unless p.stop?
+      p.stop(server: @, cb)
+    , (err) =>
+      return callback(err) if err?
+      
+      @http.close()
+      callback()
 
 module.exports = Server

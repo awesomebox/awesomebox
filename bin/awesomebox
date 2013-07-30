@@ -1,4 +1,20 @@
 #!/usr/bin/env node
 
-require('coffee-script');
-require('../lib/command_line');
+var open = require('open')
+  , async = require('async')
+  , awesomebox = require('../')
+  , server = new awesomebox.Server();
+
+async.series([
+  function(cb) { server.initialize(cb); },
+  function(cb) { server.configure(cb); },
+  function(cb) { server.start(cb); }
+], function(err) {
+  if (err) {
+    console.log(err.stack);
+    process.exit(1);
+  }
+  
+  console.log('[awesomebox] Listening on port ' + server.address.port);
+  open('http://' + server.address.address + ':' + server.address.port + '/')
+});
