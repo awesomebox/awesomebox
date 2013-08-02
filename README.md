@@ -1,11 +1,18 @@
 # awesomebox
 
-Concentrate on building your site, not managing it
+Effortless HTML, CSS, JS Development in the flavor of your choice
 
 ## Installation
 
 ```bash
 $ npm install -g awesomebox
+```
+
+## Usage
+
+```bash
+$ cd /path/to/my/project
+$ awesomebox
 ```
 
 ## Features
