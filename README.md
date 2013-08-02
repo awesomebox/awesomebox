@@ -8,6 +8,101 @@ Concentrate on building your site, not managing it
 $ npm install -g awesomebox
 ```
 
+## Features
+
+- Automatic Transpilation of HTML, CSS, and Javascript dialects
+- Automatic Transpilation of `<script>` and `<style>` tags
+- Layouts
+- Partials
+- Data Files (JSON and YAML)
+
+## Currently Supported Dialects
+
+### HTML
+
+##### [atpl](https://github.com/soywiz/atpl.js)
+`filename.html.atpl`
+
+##### [dust](http://akdubya.github.io/dustjs/)
+`filename.html.dust`
+
+##### [eco](https://github.com/sstephenson/eco)
+`filename.html.eco`
+
+##### [ect](http://ectjs.com/)
+`filename.html.ect`
+
+##### [ejs](https://github.com/visionmedia/ejs)
+`filename.html.ejs`
+
+##### [haml](http://haml.info/)
+`filename.html.haml`
+
+##### [haml-coffee](https://github.com/9elements/haml-coffee)
+`filename.html.haml-coffee`
+
+##### [handlebars](http://handlebarsjs.com/)
+`filename.html.handlebars`
+
+##### [hogan](http://twitter.github.io/hogan.js/)
+`filename.html.hogan`
+
+##### [jade](http://jade-lang.com/)
+`filename.html.jade`
+
+##### [jazz](https://github.com/shinetech/jazz)
+`filename.html.jazz`
+
+##### [jqtpl](https://github.com/kof/jqtpl)
+`filename.html.jqtpl`
+
+##### [JUST](https://github.com/baryshev/just)
+`filename.html.just`
+
+##### [liquor](https://github.com/chjj/liquor)
+`filename.html.liquor`
+
+##### [mustache](http://mustache.github.io/)
+`filename.html.mustache`
+
+##### [QEJS](https://github.com/jepso/QEJS)
+`filename.html.qejs`
+
+##### [swig](http://paularmstrong.github.io/swig/)
+`filename.html.swig`
+
+##### [templayed](http://archan937.github.io/templayed.js/)
+`filename.html.templayed`
+
+##### [toffee](https://github.com/malgorithms/toffee)
+`filename.html.toffee`
+
+##### [underscore](http://documentcloud.github.io/underscore/#template)
+`filename.html.underscore`
+
+##### [walrus](http://documentup.com/jeremyruppel/walrus/)
+`filename.html.walrus`
+
+##### [whiskers](https://github.com/gsf/whiskers.js/)
+`filename.html.whiskers`
+
+### CSS
+
+##### [less](http://lesscss.org/)
+`filename.css.less` or `<style type="text/less"></style>`
+
+##### [sass/scss](http://sass-lang.com/)
+`filename.css.sass` or `<style type="text/sass"></style>`
+
+##### [stylus](http://learnboost.github.io/stylus/)
+`filename.css.styl` or `<style type="text/stylus"></style>`
+
+### Javascript
+
+##### [coffee-script](http://coffeescript.org/)
+`filename.js.coffee` or `<script type="text/coffeescript"></script>`
+
+
 ## Directory Structure
 
 To use awesomebox, you never need to change the directory structure that you're currently using. Just run awesomebox in
