@@ -4,7 +4,7 @@ express = require 'express'
 walkabout = require 'walkabout'
 tubing = require 'tubing'
 tubing_view = require 'tubing-view'
-{RenderPipeline, LayoutPipeline} = require './view_pipeline'
+{RenderPipeline, handle_layouts} = require './view_pipeline'
 
 root = walkabout()
 content_dir = root.join('content')
@@ -91,28 +91,21 @@ compile_style_tags = (cmd, done) ->
 
 ExtraPipeline = tubing.pipeline()
   .then(add_cheerio)
-  .then(compile_script_tags)
-  .then(compile_style_tags)
+  .then(compile_script_tags, compile_style_tags)
   .then(write_cheerio_content)
-
-# debug = (msg) ->
-#   (cmd, done) ->
-#     console.log (cmd?.path or ''), (cmd?.content_type or ''), msg
-#     done()
 
 HttpPipeline = tubing.pipeline('Http Pipeline')
   .then(configure_paths)
   .then(tubing_view.adapt_http_req)
   .then(RenderPipeline)
   .then(tubing.exit_unless('resolved'))
-  .then(LayoutPipeline)
-  .then((cmd) -> ExtraPipeline.configure(@config).push(cmd))
+  .then(handle_layouts)
+  .then (cmd) -> ExtraPipeline.configure(@config).push(cmd)
 
 FileRenderPipeline = tubing.pipeline()
   .then(RenderPipeline)
   .then (cmd) -> ExtraPipeline.configure(@config).push(cmd)
 
-# basic_pipeline = BasicPipeline.configure()
 http_pipeline = HttpPipeline.configure().publish_to(HttpSink)
 file_render_pipeline = FileRenderPipeline.configure(
   resolve_to: 'content'

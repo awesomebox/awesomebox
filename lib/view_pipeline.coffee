@@ -37,7 +37,7 @@ box_partial = (cmd, path, partial_data) ->
   else
     partial_path = cmd.resolved.path.directory().join(path)
   
-  exports.RenderPipeline
+  exports.PartialPipeline
     .configure(@config)
     .push(
       path: partial_path
@@ -103,8 +103,6 @@ exports.wait_for_placeholders = (cmd, done) ->
 exports.handle_layouts = (cmd, done) ->
   return done() unless @config.enabled.layouts is true and cmd.content_type is 'html'
   
-  # console.log 'HANDLE LAYOUTS'
-  
   path = cmd.resolved.path.dirname
   
   if path[0] is '/'
@@ -112,12 +110,7 @@ exports.handle_layouts = (cmd, done) ->
   else
     layout_path = cmd.resolved.path.directory().join(path)
   
-  layout_pipeline = exports.RenderPipeline
-    .insert((cmd, done) ->
-      # console.log 'STARTING LAYOUTS'
-      # console.log arguments
-      done()
-    , {before: exports.configure})
+  layout_pipeline = exports.LayoutPipeline
     .configure(_({}).extend(@config, {resolve_to: 'layouts'}))
   
   layout_pipeline.push(
@@ -125,18 +118,101 @@ exports.handle_layouts = (cmd, done) ->
     content_type: cmd.content_type
     data: cmd.data
     layout_content: cmd.content
-  ).then (layout_cmd) ->
+  )
+  .then (layout_cmd) ->
     cmd.content = layout_cmd.content if layout_cmd?.content?
     done()
   , done
+  
+  # don't return the promise from layout_pipeline.push
+  null
+
+
+walkabout = require 'walkabout'
+betturl = require 'tubing-view/node_modules/betturl'
+tubing_view_utils = require 'tubing-view/dist/utils'
+
+create_layout_paths = (path, content_type) ->
+  paths = []
+  
+  while path isnt '/'
+    paths.push("#{path}.#{content_type}")
+    path = require('path').dirname(path)
+  paths.push("/index.#{content_type}")
+  
+  paths
+
+exports.resolve_layout_path = (cmd, done) ->
+  cmd.parsed = betturl.parse(cmd.path)
+  
+  root = @config.path[@config.resolve_to]
+  path = cmd.parsed.path.replace(new RegExp('\.' + cmd.content_type + '$'), '')
+  paths = create_layout_paths(path, cmd.content_type)
+
+  # console.log 'RESOLVING LAYOUT PATH', @config.resolve_to, root.absolute_path, paths, cmd.content_type
+  
+  tubing_view_utils.resolve_path_from_root root, paths, (err, content_path, matched_path) =>
+    return done(err) if err?
+    return done() unless content_path?
+
+    cmd.resolved =
+      file: content_path
+      path: walkabout(content_path.absolute_path.slice(root.absolute_path.length))
+
+    # console.log 'RESOLVED LAYOUT TO', cmd.resolved.path.absolute_path
+    
+    engines = cmd.resolved.path.filename.slice(require('path').basename(matched_path).length + 1)
+    engines = engines.replace(new RegExp('^(/?index)?\.' + cmd.content_type + '\.?'), '').split('.')
+    cmd.engines = engines.filter((e) -> e? and e isnt '').reverse()
+    
+    done()
+
+exports.resolve_partial_path = (cmd, done) ->
+  cmd.parsed = betturl.parse(cmd.path)
+  
+  path = cmd.parsed.path.replace(new RegExp('\.' + cmd.content_type + '$'), '')
+  idx = path.lastIndexOf('/')
+  if idx is -1
+    path = '_' + path
+  else
+    path = path.slice(0, idx + 1) + '_' + path.slice(idx + 1)
+
+  # console.log 'RESOLVING PARTIAL PATH', @config.resolve_to, @config.path[@config.resolve_to].absolute_path, path, cmd.content_type
+
+  tubing_view_utils.resolve_path_from_root @config.path[@config.resolve_to], "#{path}.#{cmd.content_type}", (err, content_path) =>
+    return done(err) if err?
+    unless content_path?
+      console.log 'Could not find partial at path ' + path
+      return done()
+
+    cmd.resolved =
+      file: content_path
+      path: walkabout(content_path.absolute_path.slice(@config.path[@config.resolve_to].absolute_path.length))
+
+    # console.log 'RESOLVED PARTIAL TO', cmd.resolved.path.absolute_path
+
+    engines = content_path.absolute_path.slice(content_path.absolute_path.lastIndexOf(path) + path.length)
+    engines = engines.replace(new RegExp('^(/?index)?\.' + cmd.content_type + '\.?'), '').split('.')
+    cmd.engines = engines.filter((e) -> e? and e isnt '').reverse()
+
+    done()
+
+exports.AutoInstallViewPipeline = tubing_view.ViewPipeline
+  .insert(exports.install_engines, before: tubing_view.render_engines)
 
 exports.RenderPipeline = tubing.pipeline()
   .then(exports.configure)
-  .then(
-    tubing_view.ViewPipeline
-      .insert(exports.install_engines, before: tubing_view.render_engines)
-  )
+  .then(exports.AutoInstallViewPipeline)
   .then(exports.wait_for_placeholders)
 
-exports.LayoutPipeline = tubing.pipeline()
-  .then(exports.handle_layouts)
+exports.LayoutPipeline = exports.RenderPipeline
+  .insert(
+    exports.AutoInstallViewPipeline.insert(exports.resolve_layout_path, instead_of: tubing_view.resolve_path)
+    instead_of: exports.AutoInstallViewPipeline
+  )
+
+exports.PartialPipeline = exports.RenderPipeline
+  .insert(
+    exports.AutoInstallViewPipeline.insert(exports.resolve_partial_path, instead_of: tubing_view.resolve_path)
+    instead_of: exports.AutoInstallViewPipeline
+  )

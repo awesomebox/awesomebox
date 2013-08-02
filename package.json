@@ -1,7 +1,7 @@
 {
   "name": "awesomebox",
   "description": "The box that is awesome",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "homepage": "https://github.com/mattinsler/awesomebox",
   "author": {
     "name": "Matt Insler",
@@ -39,8 +39,8 @@
     "portfinder": "https://github.com/mattinsler/node-portfinder/tarball/master",
     "open": "0.0.3",
     "tiny-lr": "0.0.4",
-    "tubing": "0.0.4",
-    "tubing-view": "0.0.2",
+    "tubing": "0.0.5",
+    "tubing-view": "0.0.3",
     "chokidar": "~0.6.2"
   },
   "devDependencies": {},
