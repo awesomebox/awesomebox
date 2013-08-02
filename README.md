@@ -4,11 +4,19 @@ Effortless HTML, CSS, JS development in the flavor of your choice
 
 ## Installation
 
+You'll have to have node.js installed first. The easiest way to do this is going to [nodejs.org](http://nodejs.org/)
+and clicking the big INSTALL button. Once node.js is installed, open up a terminal and and run the following.
+
 ```bash
 $ npm install -g awesomebox
 ```
 
+You may need to sudo in order to install awesomebox. Alternatively you can grant yourself permissions to `/usr/local`
+running `sudo chown $USER -R /usr/local` first.
+
 ## Usage
+
+Then to run awesomebox, just change directory into your project's directory and run awesomebox from there. That's it!
 
 ```bash
 $ cd /path/to/my/project
