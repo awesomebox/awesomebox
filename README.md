@@ -1,6 +1,6 @@
 # awesomebox
 
-Effortless HTML, CSS, JS Development in the flavor of your choice
+Effortless HTML, CSS, JS development in the flavor of your choice
 
 ## Installation
 
