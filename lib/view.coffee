@@ -54,6 +54,8 @@ compile_script_tags = (cmd, done) ->
     $el = cmd.cheerio(el)
     type = $el.attr('type')
     
+    return cb() unless tubing_view.Engines.get_engine_by_attr_type(type)?
+    
     tubing_view.Engines.install_engine_by_attr_type type, (err) ->
       return cb(err) if err?
     
@@ -74,6 +76,8 @@ compile_style_tags = (cmd, done) ->
   async.each cmd.cheerio('style[type]').toArray(), (el, cb) ->
     $el = cmd.cheerio(el)
     type = $el.attr('type')
+    
+    return cb() unless tubing_view.Engines.get_engine_by_attr_type(type)?
     
     tubing_view.Engines.install_engine_by_attr_type type, (err) ->
       return cb(err) if err?
