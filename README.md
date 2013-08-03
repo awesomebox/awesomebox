@@ -4,11 +4,19 @@ Effortless HTML, CSS, JS development in the flavor of your choice
 
 ## Installation
 
+You'll have to have node.js installed first. The easiest way to do this is going to [nodejs.org](http://nodejs.org/)
+and clicking the big INSTALL button. Once node.js is installed, open up a terminal and and run the following.
+
 ```bash
 $ npm install -g awesomebox
 ```
 
+You may need to sudo in order to install awesomebox. Alternatively you can grant yourself permissions to `/usr/local`
+running `sudo chown $USER -R /usr/local` first.
+
 ## Usage
+
+Then to run awesomebox, just change directory into your project's directory and run awesomebox from there. That's it!
 
 ```bash
 $ cd /path/to/my/project
@@ -214,10 +222,84 @@ that page. For instance, for a page at `/foo/bar/baz.html{.engine?}`, the resolu
 
 Layouts can use the `box.content()` method to place the content of the rendered page.
 
+For example, you could create a simple layout that uses partials for the header and footer, and inserts the page
+content between them.
+
+##### `/layouts/index.html.ejs`
+```erb
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Amazing Project<%- typeof(title) !== 'undefined' ? ' | ' + title : '' %></title>
+</head>
+<body>
+  <%- box.content('/partials/header') %>
+  <%- box.content() %>
+  <%- box.content('/partials/footer') %>
+</body>
+</html>
+```
+
+This example also shows how you can share variables between the rendered content and the layout since the content
+is rendered first, then the layout is rendered.
+
+##### `/content/index.html.ejs`
+```erb
+<% title = 'Welcome!' %>
+
+<h1>Welcome to my awesome project!</h1>
+
+<p>
+  I hope you have a nice stay. Look around for a bit.
+</p>
+```
+
 ## Data
 
-`box.data()`
-`box.data.raw()`
+Data files can be used for a lot of different things, like configuration, example data, lists of information, etc.
+These files can either be read in as raw files or parsed for you to use in your templates. Currently recognized formats
+are `JSON` and `YAML` files with extensions `.json`, `.yaml`, `.yml`. All data files should reside in the `data` directory
+and will be resolved within that directory.
+
+For example, let's say that you want to display a list of names and pictures on your team page. You could maintain
+that list in a data file and reference it from your template with `box.data(...)`.
+
+##### `/data/team.json`
+```json
+[{
+  "name": "Matt Insler",
+  "email": "matt.insler@gmail.com",
+  "website": "http://www.mattinsler.com",
+  "picture": "http://www.gravatar.com/avatar/45d9a0f5a6e7dae520a768d615e54a74.png"
+}, {
+  "name": "Boo Boo Insler",
+  "email": "i.am.a.cute.dog@gmail.com",
+  "website": "http://www.dailypuppy.com/",
+  "picture": "http://cdn-www.dailypuppy.com/dog-images/oliver-the-dalmatian_71956_2013-07-29_w450.jpg"
+}]
+```
+
+##### `/content/team.html.ejs`
+```erb
+<h1>Our Awesome Team</h1>
+
+<ul class="unstyled">
+<% box.data('/team').forEach(function(person) { %>
+  <li>
+    <h3><%= person.name %> <small><a href="mailto:<%- person.email %>"><%= person.email %></a></small></h3>
+    <img src="<%- person.picture %>">
+    <p>Check out my work at <a href="<%- person.website %>" target="_blank"><%= person.website %></a></p>
+  </li>
+<% }) %>
+</ul>
+```
+
+You can also read the data raw with `box.data.raw(...)`. This is great for debugging data files too.
+
+```erb
+Check out my data.
+<pre><%- box.data.raw('/team') %></pre>
+```
 
 ## License
 Copyright (c) 2013 Matt Insler  
