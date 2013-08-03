@@ -1,7 +1,7 @@
 {
   "name": "awesomebox",
   "description": "The box that is awesome",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "homepage": "https://github.com/awesomebox/awesomebox",
   "author": {
     "name": "Matt Insler",
@@ -40,7 +40,7 @@
     "open": "0.0.3",
     "tiny-lr": "0.0.4",
     "tubing": "0.0.5",
-    "tubing-view": "0.0.3",
+    "tubing-view": "0.0.4",
     "chokidar": "~0.6.2"
   },
   "devDependencies": {},
