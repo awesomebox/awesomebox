@@ -101,7 +101,10 @@ ExtraPipeline = tubing.pipeline()
 HttpPipeline = tubing.pipeline('Http Pipeline')
   .then(configure_paths)
   .then(tubing_view.adapt_http_req)
-  .then(tubing.exit_unless (cmd) -> mime.lookup(cmd.content_type).indexOf('text/') is 0)
+  .then(tubing.exit_unless (cmd) ->
+    type = mime.lookup(cmd.content_type)
+    type.indexOf('text/') is 0 or type in ['application/javascript', 'application/json']
+  )
   .then(RenderPipeline)
   .then(tubing.exit_unless('resolved'))
   .then(handle_layouts)
