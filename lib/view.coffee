@@ -101,6 +101,7 @@ ExtraPipeline = tubing.pipeline()
 HttpPipeline = tubing.pipeline('Http Pipeline')
   .then(configure_paths)
   .then(tubing_view.adapt_http_req)
+  .then(tubing.exit_unless (cmd) -> mime.lookup(cmd.content_type).indexOf('text/') is 0)
   .then(RenderPipeline)
   .then(tubing.exit_unless('resolved'))
   .then(handle_layouts)
@@ -143,7 +144,14 @@ class View
   
   @send_response: (res, code, content_type, content) ->
     res.status(code)
-    res.set('Content-Type': mime.lookup(content_type))
+    
+    type = mime.lookup(content_type)
+    
+    if type.indexOf('text/')
+      res.set('Content-Type': "#{type}; charset=#{mime.charsets.lookup(content_type)}")
+    else
+      res.set('Content-Type': type)
+    
     res.send(content)
 
 module.exports = View
