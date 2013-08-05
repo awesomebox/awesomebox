@@ -2,8 +2,23 @@
 
 var open = require('open')
   , async = require('async')
-  , awesomebox = require('../')
-  , server = new awesomebox.Server();
+  , awesomebox = require('../');
+
+var opts = require('nopt')({
+  watch: Boolean,
+  'hunt-port': Boolean,
+  port: String
+}, {
+  p: '--port'
+}, process.argv);
+
+if (!opts.watch) opts.watch = true;
+if (!opts['hunt-port']) opts['hunt-port'] = true;
+if (process.env.PORT && !opts.port) opts.port = process.env.PORT;
+
+console.log(opts);
+
+var server = new awesomebox.Server(opts);
 
 async.series([
   function(cb) { server.initialize(cb); },

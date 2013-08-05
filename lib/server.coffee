@@ -6,14 +6,13 @@ Route = require './route'
 View = require './view'
 
 class Server extends EventEmitter
-  constructor: ->
+  constructor: (@opts = {}) ->
     @http = express()
     @plugins = []
     @__defineGetter__ 'address', => @raw_http.address()
   
   initialize: (callback) ->
-    opts = require('nopt')(process.argv)
-    unless opts.watch is false
+    if @opts.watch
       livereload = require './plugins/livereload'
       @plugins.push(livereload())
     callback()
@@ -32,9 +31,7 @@ class Server extends EventEmitter
     @configure_middleware(callback)
   
   start: (callback) ->
-    portfinder.basePort = 8000
-    portfinder.getPort (err, port) =>
-      return callback(err) if err?
+    listen = (port) =>
       @raw_http = @http.listen port, 'localhost', (err) =>
         return callback(err) if err?
         
@@ -46,6 +43,16 @@ class Server extends EventEmitter
           
           @emit('listening')
           callback()
+    
+    if @opts['hunt-port'] is false
+      return listen(@opts.port) if @opts.port?
+      return listen(8000)
+    
+    portfinder.basePort = @opts.port or 8000
+    
+    portfinder.getPort (err, port) =>
+      return callback(err) if err?
+      listen(port)
   
   stop: (callback) ->
     async.each @plugins, (p, cb) =>
