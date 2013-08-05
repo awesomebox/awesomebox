@@ -7,16 +7,14 @@ var open = require('open')
 var opts = require('nopt')({
   watch: Boolean,
   'hunt-port': Boolean,
-  port: String
+  port: Number
 }, {
   p: '--port'
 }, process.argv);
 
-if (!opts.watch) opts.watch = true;
-if (!opts['hunt-port']) opts['hunt-port'] = true;
-if (process.env.PORT && !opts.port) opts.port = process.env.PORT;
-
-console.log(opts);
+if (opts.watch === undefined) opts.watch = true;
+if (opts['hunt-port'] === undefined) opts['hunt-port'] = true;
+if (process.env.PORT && opts.port === undefined) opts.port = parseInt(process.env.PORT);
 
 var server = new awesomebox.Server(opts);
 
