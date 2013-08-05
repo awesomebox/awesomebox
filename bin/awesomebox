@@ -7,7 +7,8 @@ var open = require('open')
 var opts = require('nopt')({
   watch: Boolean,
   'hunt-port': Boolean,
-  port: Number
+  port: Number,
+  open: Boolean
 }, {
   p: '--port'
 }, process.argv);
@@ -29,5 +30,7 @@ async.series([
   }
   
   console.log('[awesomebox] Listening on port ' + server.address.port);
-  open('http://' + server.address.address + ':' + server.address.port + '/')
+  if (opts.open !== false) {
+    open('http://' + (['0.0.0.0', '127.0.0.1'].indexOf(server.address.address) !== -1 ? 'localhost' : server.address.address) + ':' + server.address.port + '/');
+  }
 });

@@ -32,7 +32,7 @@ class Server extends EventEmitter
   
   start: (callback) ->
     listen = (port) =>
-      @raw_http = @http.listen port, 'localhost', (err) =>
+      @raw_http = @http.listen port, (err) =>
         return callback(err) if err?
         
         async.each @plugins, (p, cb) =>
