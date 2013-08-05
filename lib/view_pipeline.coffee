@@ -143,8 +143,6 @@ create_layout_paths = (path, content_type) ->
   paths
 
 exports.resolve_layout_path = (cmd, done) ->
-  cmd.parsed = betturl.parse(cmd.path)
-  
   root = @config.path[@config.resolve_to]
   path = cmd.parsed.path.replace(new RegExp('\.' + cmd.content_type + '$'), '')
   paths = create_layout_paths(path, cmd.content_type)
@@ -168,8 +166,6 @@ exports.resolve_layout_path = (cmd, done) ->
     done()
 
 exports.resolve_partial_path = (cmd, done) ->
-  cmd.parsed = betturl.parse(cmd.path)
-  
   path = cmd.parsed.path.replace(new RegExp('\.' + cmd.content_type + '$'), '')
   idx = path.lastIndexOf('/')
   if idx is -1
@@ -199,6 +195,10 @@ exports.resolve_partial_path = (cmd, done) ->
 
 exports.AutoInstallViewPipeline = tubing_view.ViewPipeline
   .insert(exports.install_engines, before: tubing_view.render_engines)
+  .insert(
+    tubing.exit_unless (cmd) -> cmd.mime_type.indexOf('text/') is 0 or cmd.mime_type in ['application/javascript', 'application/json']
+    before: tubing_view.resolve_path
+  )
 
 exports.RenderPipeline = tubing.pipeline()
   .then(exports.configure)

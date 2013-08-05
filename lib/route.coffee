@@ -18,7 +18,7 @@ class Route
     
     View.render_file __dirname + '/templates/error', 'html', data, (err, content) ->
       return next(err) if err?
-      View.send_response(res, code, 'html', content)
+      View.send_response(res, code, 'text/html', 'UTF-8', content)
   
   @not_found: (req, res, next) ->
     return next() unless req.view.command.content_type is 'html'
@@ -29,6 +29,6 @@ class Route
     
     View.render_file __dirname + '/templates/404', 'html', data, (err, content) ->
       return next(err) if err?
-      View.send_response(res, 404, 'html', content)
+      View.send_response(res, 404, 'text/html', 'UTF-8', content)
 
 module.exports = Route

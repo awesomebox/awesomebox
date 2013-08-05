@@ -1,4 +1,3 @@
-mime = require 'mime'
 async = require 'async'
 express = require 'express'
 walkabout = require 'walkabout'
@@ -34,7 +33,7 @@ HttpSink = tubing.sink (err, cmd) ->
   return cmd.next(err) if err?
   return express.static(@config.path.content.absolute_path)(cmd.req, cmd.res, cmd.next) unless cmd?.content?
   
-  View.send_response(cmd.res, 200, cmd.content_type, cmd.content)
+  View.send_response(cmd.res, 200, cmd.mime_type, cmd.mime_charset, cmd.content)
 
 add_cheerio = (cmd, done) ->
   return done() unless cmd.content_type is 'html' and cmd.content?
@@ -101,10 +100,6 @@ ExtraPipeline = tubing.pipeline()
 HttpPipeline = tubing.pipeline('Http Pipeline')
   .then(configure_paths)
   .then(tubing_view.adapt_http_req)
-  .then(tubing.exit_unless (cmd) ->
-    type = mime.lookup(cmd.content_type)
-    type.indexOf('text/') is 0 or type in ['application/javascript', 'application/json']
-  )
   .then(RenderPipeline)
   .then(tubing.exit_unless('resolved'))
   .then(handle_layouts)
@@ -145,15 +140,13 @@ class View
       callback(null, cmd?.content)
     , callback
   
-  @send_response: (res, code, content_type, content) ->
+  @send_response: (res, code, mime_type, mime_charset, content) ->
     res.status(code)
     
-    type = mime.lookup(content_type)
-    
-    if type.indexOf('text/')
-      res.set('Content-Type': "#{type}; charset=#{mime.charsets.lookup(content_type)}")
+    if mime_charset?
+      res.set('Content-Type': "#{mime_type}; charset=#{mime_charset}")
     else
-      res.set('Content-Type': type)
+      res.set('Content-Type': mime_type)
     
     res.send(content)
 
