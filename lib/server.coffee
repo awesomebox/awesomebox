@@ -1,31 +1,25 @@
 {EventEmitter} = require 'events'
 async = require 'async'
 express = require 'express'
-# flash = require 'connect-flash'
 portfinder = require 'portfinder'
 Route = require './route'
 View = require './view'
 
-livereload = require('./plugins/livereload')()
-# mixpanel = require('./plugins/mixpanel')()
-
 class Server extends EventEmitter
   constructor: ->
     @http = express()
-    @plugins = [livereload]
+    @plugins = []
     @__defineGetter__ 'address', => @raw_http.address()
   
   initialize: (callback) ->
+    opts = require('nopt')(process.argv)
+    unless opts.watch is false
+      livereload = require './plugins/livereload'
+      @plugins.push(livereload())
     callback()
   
   configure_middleware: (callback) ->
     @http.use express.logger()
-    # @http.use express.compress()
-    # @http.use express.bodyParser()
-    # @http.use express.methodOverride()
-    # @http.use express.cookieParser()
-    # @http.use express.session(secret: 'hohgah5Weegi0zae6vookaehoo0ieQu5')
-    # @http.use flash()
     @http.use(Route.respond)
     @http.use(Route.respond_error)
     @http.use(Route.not_found)
@@ -41,7 +35,7 @@ class Server extends EventEmitter
     portfinder.basePort = 8000
     portfinder.getPort (err, port) =>
       return callback(err) if err?
-      @raw_http = @http.listen port, (err) =>
+      @raw_http = @http.listen port, 'localhost', (err) =>
         return callback(err) if err?
         
         async.each @plugins, (p, cb) =>
