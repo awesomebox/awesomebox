@@ -301,6 +301,14 @@ Check out my data.
 <pre><%- box.data.raw('/team') %></pre>
 ```
 
+## Deploying
+
+If you'd like to run awesomebox on your own server, you're more than welcome to!
+
+However, if you want something a little easier, you can deploy your project to Heroku with almost no work at all.
+Just use the [Awesomebox Heroku Buildpack](https://github.com/awesomebox/heroku-buildpack-awesomebox) (follow the link
+for instructions).
+
 ## License
 Copyright (c) 2013 Matt Insler  
 Licensed under the MIT license.
