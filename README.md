@@ -77,6 +77,9 @@ $ awesomebox
 ##### [liquor](https://github.com/chjj/liquor)
 `filename.html.liquor`
 
+##### [markdown](https://github.com/chjj/marked) using [pygmentize](https://github.com/rvagg/node-pygmentize-bundled)
+`filename.html.md` or `filename.html.markdown`
+
 ##### [mustache](http://mustache.github.io/)
 `filename.html.mustache`
 
@@ -117,6 +120,8 @@ $ awesomebox
 ##### [coffee-script](http://coffeescript.org/)
 `filename.js.coffee` or `<script type="text/coffeescript"></script>`
 
+##### [React.js](http://facebook.github.io/react/index.html)
+`filename.js.jsx` or `<script type="text/jsx"></script>`
 
 ## Directory Structure
 
