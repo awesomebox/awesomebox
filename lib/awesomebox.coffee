@@ -10,6 +10,7 @@ awesomebox = {
   }
 }
 
+awesomebox.version = require('../package').version
 awesomebox.Server = require './server'
 awesomebox.Route = require './route'
 awesomebox.View = require './view'
