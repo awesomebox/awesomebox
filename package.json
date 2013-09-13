@@ -40,7 +40,8 @@
     "tubing-view": "0.0.8",
     "chokidar": "~0.6.2",
     "coffee-script": "~1.6.3",
-    "awesomebox-cli": "https://github.com/mattinsler/awesomebox-cli/tarball/master"
+    "awesomebox-cli": "https://github.com/mattinsler/awesomebox-cli/tarball/master",
+    "betturl": "~0.2.3"
   },
   "devDependencies": {},
   "keywords": []
