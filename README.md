@@ -23,6 +23,10 @@ $ cd /path/to/my/project
 $ awesomebox
 ```
 
+## Videos
+
+Quick Intro: http://screencast.com/t/xCpB1i66
+
 ## Features
 
 - Automatic Transpilation of HTML, CSS, and Javascript dialects
