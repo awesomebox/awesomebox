@@ -129,7 +129,7 @@ exports.handle_layouts = (cmd, done) ->
 
 
 walkabout = require 'walkabout'
-betturl = require 'tubing-view/node_modules/betturl'
+betturl = require 'betturl'
 tubing_view_utils = require 'tubing-view/dist/utils'
 
 create_layout_paths = (path, content_type) ->
