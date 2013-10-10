@@ -29,19 +29,6 @@
     "node": ">= 0.8.0"
   },
   "dependencies": {
-    "walkabout": "~0.1.4",
-    "express": "~3.2.4",
-    "underscore": "~1.4.4",
-    "async": "~0.2.8",
-    "cheerio": "~0.11.0",
-    "portfinder": "https://github.com/mattinsler/node-portfinder/tarball/master",
-    "tiny-lr": "0.0.4",
-    "tubing": "0.0.6",
-    "tubing-view": "0.0.9",
-    "chokidar": "~0.6.2",
-    "coffee-script": "~1.6.3",
-    "awesomebox-cli": "0.0.1",
-    "betturl": "~0.2.3"
   },
   "devDependencies": {},
   "keywords": []
