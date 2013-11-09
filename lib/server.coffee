@@ -1,67 +1,81 @@
-{EventEmitter} = require 'events'
-async = require 'async'
+q = require 'q'
+http = require 'http'
 express = require 'express'
 portfinder = require 'portfinder'
+{EventEmitter} = require 'events'
+
 Route = require './route'
-View = require './view'
 
 class Server extends EventEmitter
   constructor: (@opts = {}) ->
-    @http = express()
+    @app = express()
     @plugins = []
-    @__defineGetter__ 'address', => @raw_http.address()
+    @__defineGetter__ 'address', -> @http.address()
   
-  initialize: (callback) ->
-    if @opts.watch
-      livereload = require './plugins/livereload'
-      @plugins.push(livereload())
-    callback()
+  start: ->
+    @initialize()
+    .then(@configure.bind(@))
+    .then(@find_port.bind(@))
+    .then(@listen.bind(@))
   
-  configure_middleware: (callback) ->
-    @http.use express.logger()
-    @http.use(Route.respond)
-    @http.use(Route.respond_error)
-    @http.use(Route.not_found)
-    callback()
+  stop: ->
+    # stop plugins
+    @plugins.reduce((o, p) =>
+      return o unless p.stop?
+      o.then(q.ninvoke(p, 'stop', server: @))
+      o
+    , q())
+    .then =>
+      @app.close()
   
-  configure: (callback) ->
-    for p in @plugins
-      View.add_pipe(p.view_pipe()) if p.view_pipe?
+  initialize: ->
+    unless @_initialized
+      @plugins.push(require('./plugins/livereload')()) if @opts.watch
+      @_initialized = true
+    q()
+  
+  configure: ->
+    # install plugins...
     
-    @configure_middleware(callback)
-  
-  start: (callback) ->
-    listen = (port) =>
-      @raw_http = @http.listen port, (err) =>
-        return callback(err) if err?
-        
-        async.each @plugins, (p, cb) =>
-          return cb() unless p.start?
-          p.start(server: @, cb)
-        , (err) =>
-          return callback(err) if err?
-          
-          @emit('listening')
-          callback()
+    # for p in @plugins
+    #   View.add_pipe(p.view_pipe()) if p.view_pipe?
     
+    # configure middleware
+    @app.use express.logger()
+    @app.use Route.respond
+    @app.use Route.respond_error
+    @app.use Route.not_found
+    q()
+  
+  find_port: ->
     if @opts['hunt-port'] is false
-      return listen(@opts.port) if @opts.port?
-      return listen(8000)
-    
-    portfinder.basePort = @opts.port or 8000
-    
-    portfinder.getPort (err, port) =>
-      return callback(err) if err?
-      listen(port)
+      @opts.port ?= 8000
+    else
+      portfinder.basePort = @opts.port or 8000
+      q.ninvoke(portfinder, 'getPort')
+      .then (port) =>
+        @opts.port = port
   
-  stop: (callback) ->
-    async.each @plugins, (p, cb) =>
-      return cb() unless p.stop?
-      p.stop(server: @, cb)
-    , (err) =>
-      return callback(err) if err?
-      
-      @http.close()
-      callback()
+  listen: ->
+    d = q.defer()
+    
+    @http = http.createServer(@app).listen(@opts.port)
+    @http.on 'error', (err) =>
+      @emit('error', err)
+      d.reject(err)
+    @http.on 'listening', =>
+      # start up plugins
+      @plugins.reduce((o, p) =>
+        return o unless p.start?
+        o.then(q.ninvoke(p, 'start', server: @))
+        o
+      , q())
+      .then =>
+        @emit('listening')
+        d.resolve()
+      .catch (err) ->
+        d.reject(err)
+    
+    d.promise
 
 module.exports = Server

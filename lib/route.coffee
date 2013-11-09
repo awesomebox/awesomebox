@@ -1,34 +1,49 @@
-View = require './view'
+path = require 'path'
+mime = require 'mime'
+express = require 'express'
+{helpers, Renderer} = require 'awesomebox-core'
+
+renderer = new Renderer(root: process.cwd())
+template_renderer = new Renderer(root: path.join(__dirname, 'templates'))
+static_middleware = express.static(process.cwd())
 
 class Route
   @respond: (req, res, next) ->
-    View.http_render(req, res, next)
+    file = helpers.find_file(renderer.opts.root, req.url)
+    return next() unless file?
+    
+    renderer.render(file)
+    .then (opts) ->
+      return static_middleware(req, res, next) unless opts.content?
+      Route.send(opts, req, res, next)
+    .catch(next)
+  
+  @send: (opts, req, res, next) ->
+    content_type = opts.content_type
+    unless content_type?
+      content_type = mime.lookup(req.url)
+      content_type = mime.lookup(opts.type) if content_type is 'application/octet-stream'
+    
+    res.status(opts.status_code or 200)
+    res.set('Content-Type': content_type)
+    res.send(opts.content)
   
   @respond_error: (err, req, res, next) ->
-    return next(err) unless req.view.command.content_type is 'html'
-    
     code = err.status if err.status?
     code = 500 if code < 400
     code ?= 500
     
-    data =
-      req: req
-      res: res
-      err: err
-    
-    View.render_file __dirname + '/templates/error', 'html', data, (err, content) ->
-      return next(err) if err?
-      View.send_response(res, code, 'text/html', 'UTF-8', content)
+    template_renderer.render('error.html.ejs', req: req, res: res, err: err)
+    .then (opts) ->
+      opts.status_code = code
+      Route.send(opts, req, res, next)
+    .catch(next)
   
   @not_found: (req, res, next) ->
-    return next() unless req.view.command.content_type is 'html'
-    
-    data =
-      req: req
-      res: res
-    
-    View.render_file __dirname + '/templates/404', 'html', data, (err, content) ->
-      return next(err) if err?
-      View.send_response(res, 404, 'text/html', 'UTF-8', content)
+    template_renderer.render('404.html.ejs', req: req, res: res)
+    .then (opts) ->
+      opts.status_code = 404
+      Route.send(opts, req, res, next)
+    .catch(next)
 
 module.exports = Route
