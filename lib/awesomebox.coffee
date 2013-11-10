@@ -12,7 +12,7 @@ awesomebox = {
 
 awesomebox.version = require('../package').version
 awesomebox.Server = require './server'
-awesomebox.Route = require './route'
+awesomebox.Router = require './router'
 # awesomebox.View = require './view'
 # awesomebox.ViewPipeline = require './view_pipeline'
 

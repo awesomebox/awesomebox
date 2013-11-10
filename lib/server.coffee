@@ -4,11 +4,12 @@ express = require 'express'
 portfinder = require 'portfinder'
 {EventEmitter} = require 'events'
 
-Route = require './route'
+Router = require './router'
 
 class Server extends EventEmitter
   constructor: (@opts = {}) ->
     @app = express()
+    @router = new Router(@)
     @plugins = []
     @__defineGetter__ 'address', -> @http.address()
   
@@ -20,31 +21,32 @@ class Server extends EventEmitter
   
   stop: ->
     # stop plugins
-    @plugins.reduce((o, p) =>
-      return o unless p.stop?
-      o.then(q.ninvoke(p, 'stop', server: @))
-      o
-    , q())
+    @plugins.reduce (o, p) ->
+      o.then -> p.stop?()
+    , q()
     .then =>
       @app.close()
   
   initialize: ->
     unless @_initialized
-      @plugins.push(require('./plugins/livereload')()) if @opts.watch
+      @plugins.push(require('./plugins/livereload')) if @opts.watch
       @_initialized = true
     q()
   
   configure: ->
-    # install plugins...
+    # instantiate plugins
+    @plugins = @plugins.map (p) => p(@)
     
-    # for p in @plugins
-    #   View.add_pipe(p.view_pipe()) if p.view_pipe?
+    # install plugins...
+    @plugins.reduce (o, p) ->
+      o.then -> p.install?()
+    , q()
     
     # configure middleware
     @app.use express.logger()
-    @app.use Route.respond
-    @app.use Route.respond_error
-    @app.use Route.not_found
+    @app.use @router.respond.bind(@router)
+    @app.use @router.respond_error.bind(@router)
+    @app.use @router.not_found.bind(@router)
     q()
   
   find_port: ->
@@ -64,12 +66,10 @@ class Server extends EventEmitter
       @emit('error', err)
       d.reject(err)
     @http.on 'listening', =>
-      # start up plugins
-      @plugins.reduce((o, p) =>
-        return o unless p.start?
-        o.then(q.ninvoke(p, 'start', server: @))
-        o
-      , q())
+      # start plugins
+      @plugins.reduce (o, p) ->
+        o.then -> p.start?()
+      , q()
       .then =>
         @emit('listening')
         d.resolve()

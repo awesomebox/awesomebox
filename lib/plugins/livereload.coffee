@@ -1,12 +1,25 @@
+q = require 'q'
 chokidar = require 'chokidar'
 portfinder = require 'portfinder'
 LivereloadServer = require 'tiny-lr'
 
 class Livereload
-  constructor: ->
-    return new Livereload() unless @ instanceof Livereload
+  constructor: (server) ->
+    return new Livereload(server) unless @ instanceof Livereload
+    @server = server
   
-  start: (context, callback) ->
+  install: ->
+    @server.router.renderer.steps['post-process'].insert(
+      {livereload: @insert_script.bind(@)}
+      {before: 'extract-from-cheerio'}
+    )
+    
+    @server.router.template_renderer.steps['post-process'].insert(
+      {livereload: @insert_script.bind(@)}
+      {before: 'extract-from-cheerio'}
+    )
+  
+  start: ->
     @lr_server = new LivereloadServer()
     
     @watcher = chokidar.watch(process.cwd(), persistent: true)
@@ -21,13 +34,11 @@ class Livereload
       .on('error', (err) -> console.log(err.stack))
     
     portfinder.basePort = 35729
-    portfinder.getPort (err, port) =>
-      return callback(err) if err?
-      
+    q.ninvoke(portfinder, 'getPort')
+    .then (port) =>
       @lr_server.listen(port)
-      callback()
   
-  stop: (context, callback) ->
+  stop: ->
     # @gaze.close()
     @watcher.close()
     @lr_server.close()
@@ -40,16 +51,10 @@ class Livereload
     </script>
     '''.replace('#{port}', @lr_server.port)
   
-  view_pipe: ->
-    (cmd, done) =>
-      $ = cmd.cheerio
-      return done() unless $
-    
-      n = $('body, head').toArray()
-      return done() if n.length is 0
-    
-      $(n[0]).append(@create_snippet())
-    
-      done()
+  insert_script: (opts) ->
+    n = opts.$('body, head').toArray()
+    return if n.length is 0
+  
+    opts.$(n[0]).append(@create_snippet())
 
 module.exports = Livereload
