@@ -29,14 +29,20 @@
     "node": ">= 0.8.0"
   },
   "dependencies": {
-    "express": "~3.2.4",
+    "express": "~3.4.4",
     "portfinder": "https://github.com/mattinsler/node-portfinder/tarball/master",
     "tiny-lr": "0.0.4",
     "chokidar": "~0.6.2",
     "coffee-script": "~1.6.3",
     "q": "~0.9.7",
     "mime": "~1.2.11",
-    "awesomebox-core": "~0.0.1"
+    "json3": "~3.2.5",
+    "commandment": "0.2.0",
+    "awesomebox.node": "0.0.15",
+    "osenv": "0.0.3",
+    "open": "0.0.4",
+    "syncr": "0.0.2",
+    "awesomebox-core": "0.0.1"
   },
   "devDependencies": {},
   "keywords": []

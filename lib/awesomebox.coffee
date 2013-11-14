@@ -1,19 +1,6 @@
-# process.on 'uncaughtException', (err) ->
-#   console.log(err.stack)
-
-# walkabout = require 'walkabout'
-
-awesomebox = {
-  # root: walkabout(__dirname).join('..')
-  # path: {
-  #   root: walkabout()
-  # }
-}
-
-awesomebox.version = require('../package').version
-awesomebox.Server = require './server'
-awesomebox.Router = require './router'
-# awesomebox.View = require './view'
-# awesomebox.ViewPipeline = require './view_pipeline'
+awesomebox =
+  version: require('../package').version
+  Server: require './server'
+  Router: require './router'
 
 module.exports = awesomebox

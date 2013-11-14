@@ -1,7 +1,4 @@
 #!/usr/bin/env node
 
-require('coffee-script');
-
-require('awesomebox-cli').set({
-  awesomebox: require('../lib/awesomebox')
-}).execute(process.argv);
+require('../');
+require('../lib/app').execute(process.argv);

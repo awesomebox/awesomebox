@@ -5,6 +5,7 @@ express = require 'express'
 
 class Router
   constructor: (@server) ->
+    @tree = helpers.directory_tree(process.cwd())
     @renderer = new Renderer(root: process.cwd())
     @template_renderer = new Renderer(root: path.join(__dirname, 'templates'))
     @static_middleware = express.static(process.cwd())
@@ -20,10 +21,14 @@ class Router
     res.send(opts.content)
   
   respond: (req, res, next) ->
-    file = helpers.find_file(@renderer.opts.root, req.url)
-    return next() unless file?
+    filename = helpers.find_file(@renderer.opts.root, req.url)
+    return next() unless filename?
+    return next() unless @tree.is_visible(filename) and @tree.is_file(filename)
     
-    @renderer.render(file)
+    file = helpers.parse_filename(filename)
+    return @static_middleware(req, res, next) if file.type in ['', 'data']
+    
+    @renderer.render(filename)
     .then (opts) =>
       return @static_middleware(req, res, next) unless opts.content?
       @send(opts, req, res, next)
