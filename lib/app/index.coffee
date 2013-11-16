@@ -5,6 +5,8 @@ Commandment = require 'commandment'
 AwesomeboxClient = require 'awesomebox.node'
 {chalk} = Commandment
 
+AWESOMEBOX_VERSION = require('../awesomebox').version
+
 module.exports = commands = new Commandment(name: 'awesomebox', command_dir: path.join(__dirname, 'commands'))
 awesomebox_config = config(path.join(require('osenv').home(), '.awesomebox'))
 
@@ -18,7 +20,9 @@ describe_error = (err) ->
       when 'EHOSTUNREACH'
         return "I couldn't reach the awesomebox server.\nI know where it is, but it's not responding to me.\nDon't you hate when that happens?"
   
-  console.log err.stack
+  return err.body if err.name is 'Rest.Error' and err.status_code is 490
+  
+  # console.log err.stack
   text = err.body?.error
   text ?= err.body
   text ?= err.message
@@ -32,7 +36,7 @@ handle_error = (err) ->
 
 header = ->
   @logger.info 'Welcome to ' + chalk.blue.bold('awesomebox')
-  @logger.info 'You are using v' + chalk.cyan(require('../awesomebox').version)
+  @logger.info 'You are using v' + chalk.cyan(AWESOMEBOX_VERSION)
 
 footer = ->
   @logger.info chalk.green.bold('ok')
@@ -44,6 +48,7 @@ commands.before_execute (context) ->
   context.client = (auth = {}) ->
     server = context.opts.server or context.awesomebox_config.get('server')
     auth.base_url = server if server?
+    auth.user_agent = 'awesomebox@' + AWESOMEBOX_VERSION
     
     context.last_client = new AwesomeboxClient(auth)
   

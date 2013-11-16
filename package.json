@@ -38,7 +38,7 @@
     "mime": "~1.2.11",
     "json3": "~3.2.5",
     "commandment": "0.2.0",
-    "awesomebox.node": "0.0.15",
+    "awesomebox.node": "0.0.16",
     "osenv": "0.0.3",
     "open": "0.0.4",
     "syncr": "0.0.2",
