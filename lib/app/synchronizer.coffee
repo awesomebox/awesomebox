@@ -29,21 +29,22 @@ class Synchronizer
       return if delta is true
       
       sync_opts.metadata.branch = delta.branch
-      q.ninvoke(sync_opts, 'collect_metadata')
+      sync_opts.collect_metadata()
       .then (meta) ->
         sync_opts.metadata[k] = v for k, v of meta
         
         files_to_send = delta.add.concat(delta.change)
         files_to_send.reduce (promise, file) ->
-          sync_opts.on_progress("Sending #{file}...")
-          file_path = path.join(sync_opts.root, file)
+          promise.then ->
+            sync_opts.on_progress("Sending #{file}...")
+            file_path = path.join(sync_opts.root, file)
           
-          q.ninvoke(box, 'push', path: file, hash: manifest.files[file], branch: delta.branch, file: fs.createReadStream(file_path))
-          .then ->
-            sync_opts.on_progress("Sending #{file}... Done")
-          .catch (err) ->
-            sync_opts.on_progress("Sending #{file}... Error: #{err.message}")
-            throw err
+            q.ninvoke(box, 'push', path: file, hash: manifest.files[file], branch: delta.branch, file: fs.createReadStream(file_path))
+            .then ->
+              sync_opts.on_progress("Sending #{file}... Done")
+            .catch (err) ->
+              sync_opts.on_progress("Sending #{file}... Error: #{err.message}")
+              throw err
         , q()
     .then ->
       q.ninvoke(box, 'push', sync_opts.metadata)
