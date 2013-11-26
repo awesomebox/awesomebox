@@ -1,7 +1,7 @@
 {
   "name": "awesomebox",
   "description": "Effortless HTML, CSS, JS development in the flavor of your choice",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "homepage": "https://github.com/awesomebox/awesomebox",
   "author": {
     "name": "Matt Insler",
@@ -42,7 +42,7 @@
     "osenv": "0.0.3",
     "open": "0.0.4",
     "syncr": "0.0.2",
-    "awesomebox-core": "0.0.1"
+    "awesomebox-core": "0.2.0"
   },
   "devDependencies": {},
   "keywords": []
