@@ -53,7 +53,8 @@ exports.save = ->
   
   ask_which_box = (boxes) =>
     x = 0
-    @log "#{++x}) #{b.name}" for b in boxes
+    boxes = boxes.map((b) -> "#{b.owner}/#{b.name}").sort()
+    @log "#{++x}) #{b}" for b in boxes
     @log "#{++x}) Create a new box"
     
     @prompt
