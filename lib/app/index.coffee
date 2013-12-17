@@ -16,11 +16,14 @@ describe_error = (err) ->
   if err.code?
     switch err.code
       when 'ENOTFOUND'
-        return "I couldn't find the awesomebox server.\nAre you connected to the internet?\nMaybe you're in a cafe that has a shoddy connection. DOH!"
+        return "I couldn't find the awesomebox server.\nAre you connected to the internet?\nI hate when the cafe I'm in has a shoddy connection. DOH!"
       when 'EHOSTUNREACH'
         return "I couldn't reach the awesomebox server.\nI know where it is, but it's not responding to me.\nDon't you hate when that happens?"
   
-  return err.body if err.name is 'Rest.Error' and err.status_code is 490
+  if err.name is 'Rest.Error'
+    switch err.status_code
+      when 490 then return err.body
+      when 500 then return "Oh nos! There was an unexpected error on the server.\n\nWe've already been notified and our dev team will get right on it (http://bit.ly/1bvdp4Y).\nFeel free to ping us at support@awesomebox.co for more information."
   
   # console.log err.stack
   text = err.body?.error

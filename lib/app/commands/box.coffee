@@ -3,6 +3,7 @@ q = require 'q'
 errors = require '../errors'
 config = require '../config'
 Synchronizer = require '../synchronizer'
+SocketSynchronizer = require '../socket_synchronizer'
 
 exports.save = ->
   client = @client.keyed()
@@ -80,35 +81,47 @@ exports.save = ->
       @log('')
       create_box()
   
-  get_message = =>
-    @log 'Leave a message to remind yourself of the changes you made.'
-    @log('')
-    @prompt
-      message: {prompt: 'message'}
-    .then (data) =>
-      @log('')
-      data.message
+  # get_message = =>
+  #   @log 'Leave a message to remind yourself of the changes you made.'
+  #   @log('')
+  #   @prompt
+  #     message: {prompt: 'message'}
+  #   .then (data) =>
+  #     @log('')
+  #     data.message
   
   save_code_to_box = (box) =>
     @log "Preparing to save #{box.name}..."
     @log('')
     
-    synchronizer = new Synchronizer(client)
-    synchronizer.sync
+    synchronizer = new SocketSynchronizer(
       box: box.id
       root: process.cwd()
-      on_progress: @log.bind(@)
-      collect_metadata: ->
-        get_message()
-        .then (message) -> {message: message}
+      log: @log.bind(@)
+      prompt: @prompt.bind(@)
+      server: @opts.server or @awesomebox_config.get('server')
+      api_key: @awesomebox_config.get('api_key')
+    )
+    
+    # synchronizer = new Synchronizer(client)
+    # synchronizer.sync
+    #   box: box.id
+    #   root: process.cwd()
+    #   on_progress: @log.bind(@)
+    #   collect_metadata: ->
+    #     get_message()
+    #     .then (message) -> {message: message}
+    
+    synchronizer.start()
     .then (version) =>
       unless version?
+        @log('')
         @log "All of your files are up to date. Horay!"
       else
         @log('')
         @log "All done saving #{box.name}!"
         @log "We've created new version #{chalk.cyan(version.name)} for you."
-        @log "You can see it at #{chalk.cyan('http://' + version.domain)}."
+        @log "You can see it at #{chalk.cyan('http://' + version.domain)}"
   
   get_box()
   .then(save_code_to_box)

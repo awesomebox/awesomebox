@@ -30,8 +30,11 @@ exports.versions = (box) ->
     throw new Error('Please specify a box name') unless box_config.get('id')?
     box = box_config.get('id')
   
+  console.log box
+  
   client.box(box).versions.list()
   .then (versions) =>
+    console.log versions
     versions = versions.sort (lhs, rhs) -> lhs.number > rhs.number
     
     for x in [0...versions.length]
