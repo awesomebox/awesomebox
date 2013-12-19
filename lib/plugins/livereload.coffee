@@ -25,6 +25,7 @@ class Livereload
     @watcher = chokidar.watch(process.cwd(), persistent: true)
     
     on_change = (path) =>
+      @server.router.tree.invalidate(path)
       @lr_server.changed(body: {files: [path]})
     
     @watcher

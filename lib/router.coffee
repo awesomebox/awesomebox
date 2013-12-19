@@ -52,6 +52,7 @@ class Router
     @template_renderer.render('404.html.ejs', req: req, res: res)
     .then (opts) =>
       opts.status_code = 404
+      opts.content_type = 'text/html'
       @send(opts, req, res, next)
     .catch(next)
 
