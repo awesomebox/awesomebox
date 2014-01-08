@@ -53,9 +53,10 @@ exports.save = ->
       ask_which_box(boxes)
   
   ask_which_box = (boxes) =>
+    boxes = boxes.sort((l, r) -> "#{l.owner}/#{l.name}".localeCompare("#{r.owner}/#{r.name}"))
+    
     x = 0
-    boxes = boxes.map((b) -> "#{b.owner}/#{b.name}").sort()
-    @log "#{++x}) #{b}" for b in boxes
+    @log "#{++x}) #{b}" for b in boxes.map((b) -> "#{b.owner}/#{b.name}")
     @log "#{++x}) Create a new box"
     
     @prompt
