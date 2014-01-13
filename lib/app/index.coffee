@@ -10,9 +10,7 @@ AWESOMEBOX_VERSION = require('../awesomebox').version
 module.exports = commands = new Commandment(name: 'awesomebox', command_dir: path.join(__dirname, 'commands'))
 awesomebox_config = config(path.join(require('osenv').home(), '.awesomebox'))
 
-describe_error = (err) ->
-  return "Whoa there friend. You should probably login first." if errors.is_unauthorized(err)
-  
+error_text = (err) ->
   if err.code?
     switch err.code
       when 'ENOTFOUND'
@@ -23,7 +21,7 @@ describe_error = (err) ->
   if err.name is 'Rest.Error'
     switch err.status_code
       when 490 then return err.body
-      when 500 then return "Oh nos! There was an unexpected error on the server.\n\nWe've already been notified and our dev team will get right on it (http://bit.ly/1bvdp4Y).\nFeel free to ping us at support@awesomebox.co for more information."
+      when 500 then return "Oh nos! There was an unexpected error on the server.\n\nWe've already been notified and our dev team will get right on it (http://bit.ly/1bvdp4Y)."
   
   # console.log err.stack
   text = err.body?.error
@@ -31,6 +29,10 @@ describe_error = (err) ->
   text ?= err.message
   text ?= JSON.stringify(err, null, 2)
   text
+
+describe_error = (err) ->
+  return "Whoa there friend. You should probably login first." if errors.is_unauthorized(err)
+  error_text(err) + '\n\nFeel free to ping us at support@awesomebox.co for more information.'
 
 handle_error = (err) ->
   @logger.error('')

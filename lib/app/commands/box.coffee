@@ -122,7 +122,7 @@ exports.save = ->
         @log('')
         @log "All done saving #{box.name}!"
         @log "We've created new version #{chalk.cyan(version.name)} for you."
-        @log "You can see it at #{chalk.cyan('http://' + version.domain)}"
+        @log "You can see it at #{chalk.cyan(version.awesomebox_link)}"
   
   get_box()
   .then(save_code_to_box)
