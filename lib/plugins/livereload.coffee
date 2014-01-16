@@ -9,15 +9,11 @@ class Livereload
     @server = server
   
   install: ->
-    @server.router.renderer.steps['post-process'].insert(
-      {livereload: @insert_script.bind(@)}
-      {before: 'extract-from-cheerio'}
-    )
-    
-    @server.router.template_renderer.steps['post-process'].insert(
-      {livereload: @insert_script.bind(@)}
-      {before: 'extract-from-cheerio'}
-    )
+    @server.router.renderer_initializers.push (r) =>
+      r.steps['post-process'].insert(
+        {livereload: @insert_script.bind(@)}
+        {before: 'extract-from-cheerio'}
+      )
   
   start: ->
     @lr_server = new LivereloadServer()

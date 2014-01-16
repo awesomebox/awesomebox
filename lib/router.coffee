@@ -5,10 +5,22 @@ express = require 'express'
 
 class Router
   constructor: (@server) ->
-    @tree = helpers.directory_tree(process.cwd())
-    @renderer = new Renderer(root: process.cwd())
-    @template_renderer = new Renderer(root: path.join(__dirname, 'templates'))
-    @static_middleware = express.static(process.cwd())
+    @root_dir = process.cwd()
+    @template_dir = path.join(__dirname, 'templates')
+    
+    @tree = helpers.directory_tree(@root_dir)
+    @static_middleware = express.static(@root_dir)
+    
+    @renderer_initializers = []
+    
+    @__defineGetter__ 'renderer', ->
+      r = new Renderer(root: @root_dir)
+      @renderer_initializers.forEach (i) -> i(r)
+      r
+    @__defineGetter__ 'template_renderer', ->
+      r = new Renderer(root: @template_dir)
+      @renderer_initializers.forEach (i) -> i(r)
+      r
   
   send: (opts, req, res, next) ->
     content_type = opts.content_type
