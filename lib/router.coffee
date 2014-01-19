@@ -33,7 +33,7 @@ class Router
     res.send(opts.content)
   
   respond: (req, res, next) ->
-    filename = helpers.find_file(@renderer.opts.root, req.url)
+    filename = helpers.find_file(@renderer.opts.root, req.url.split(/[#?]/)[0])
     return next() unless filename?
     return next() unless @tree.is_visible(filename) and @tree.is_file(filename)
     
