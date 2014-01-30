@@ -1,3 +1,10 @@
+#Status: Deprecated
+
+Instead of requiring you to install this NPM module, [Awesomebox](http://awesomebox.co) now integrates directly with Github. 
+
+In order to focus on making the integration with your source control amazing, we're no longer providing support for this module.
+
+
 # awesomebox
 
 Effortless HTML, CSS, JS development in the flavor of your choice
