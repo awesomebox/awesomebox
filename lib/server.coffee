@@ -51,7 +51,7 @@ class Server extends EventEmitter
       , q()
     .then =>
       # configure middleware
-      # @app.use express.logger()
+      @app.use express.logger()
       @app.use @router.respond.bind(@router)
       @app.use @router.respond_error.bind(@router)
       @app.use @router.not_found.bind(@router)
