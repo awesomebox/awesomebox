@@ -4,6 +4,7 @@ express = require 'express'
 portfinder = require 'portfinder'
 {EventEmitter} = require 'events'
 
+Config = require './config'
 Router = require './router'
 
 class Server extends EventEmitter
@@ -29,7 +30,11 @@ class Server extends EventEmitter
   
   initialize: ->
     unless @_initialized
+      @config = Config.load(process.cwd())
+      
       @plugins.push(require('./plugins/livereload')) if @opts.watch
+      @plugins.push(@config.plugins...)
+      
       @_initialized = true
     q()
   
@@ -37,17 +42,19 @@ class Server extends EventEmitter
     # instantiate plugins
     @plugins = @plugins.map (p) => p(@)
     
-    # install plugins...
-    @plugins.reduce (o, p) ->
-      o.then -> p.install?()
-    , q()
-    
-    # configure middleware
-    @app.use express.logger()
-    @app.use @router.respond.bind(@router)
-    @app.use @router.respond_error.bind(@router)
-    @app.use @router.not_found.bind(@router)
     q()
+    .then =>
+      # install plugins...
+      @plugins.reduce (o, p) ->
+        o.then ->
+          q.when(p.install?())
+      , q()
+    .then =>
+      # configure middleware
+      # @app.use express.logger()
+      @app.use @router.respond.bind(@router)
+      @app.use @router.respond_error.bind(@router)
+      @app.use @router.not_found.bind(@router)
   
   find_port: ->
     if @opts['hunt-port'] is false
