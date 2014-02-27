@@ -17,21 +17,45 @@ class Config
       
       new Config(root_dir, filename or '_awesomebox.json', sandbox.config)
     catch err
+      console.log err.stack
       throw new Error('Could not parse config file: ', err.message)
     
   constructor: (@root, @filename, @data) ->
     @data.config ?= {}
     
     @plugins = []
-    @_read_plugins(path.join(@root, @data.plugin_root)) if @data.plugin_root?
+    @_read_plugins(@data.plugins) if @data.plugins?
   
-  _read_plugins: (root) ->
-    console.log 'Reading plugins from', root
-    for file in fs.readdirSync(root)
+  _read_plugins: (plugin_config = {}) ->
+    plugin_config.root ?= 'plugins'
+    plugin_config.order ?= []
+    console.log '[Plugins] Loading from', plugin_config.root
+    
+    root = path.join(@root, plugin_config.root)
+    
+    files = fs.readdirSync(root).map (f) ->
+      {
+        path: path.join(root, f)
+        name: f.replace(/\.[^\.]+$/, '')
+      }
+    .reduce (o, f) ->
+      o[f.name] = f
+      o
+    , {}
+    
+    ordered_files = []
+    for name in plugin_config.order
+      if files[name]?
+        ordered_files.push(files[name])
+        delete files[name]
+    ordered_files.push(f) for name, f of files
+    
+    for file in ordered_files
       try
-        @plugins.push(require path.join(root, file))
+        console.log '[Plugins] Loading', file.name
+        @plugins.push(require file.path)
       catch err
-        console.log 'ERROR: Could not load plugin: ', file, '\n'
+        console.log '[Plugins] ERROR: Could not load plugin: ', file.name, '\n'
         console.log err.stack
   
   get: (key, opts = {}) ->
